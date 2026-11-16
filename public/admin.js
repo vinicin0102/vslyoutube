@@ -63,6 +63,13 @@ async function uploadFile(file, kind, onProgress) {
   return blob.url;
 }
 
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const VIDEO_TYPES = ['video/mp4', 'video/webm'];
+// Tipos aceitos por campo: "pause" aceita imagem ou vídeo curto.
+const ACCEPT = { image: IMAGE_TYPES, video: VIDEO_TYPES, pause: [...IMAGE_TYPES, ...VIDEO_TYPES] };
+const ACCEPT_LABEL = { image: 'JPG, PNG, WEBP ou GIF', video: 'MP4 ou WEBM', pause: 'JPG, PNG, WEBP, GIF, MP4 ou WEBM' };
+const isVideoUrl = (u) => /\.(mp4|webm)(\?|$)/i.test(u || '');
+
 /** Campo de mídia: miniatura do arquivo atual, botão remover e seletor de arquivo. */
 function setupMedia(el, url) {
   const kind = el.dataset.kind;
@@ -73,7 +80,7 @@ function setupMedia(el, url) {
   current.className = 'media-current';
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = kind === 'video' ? 'video/mp4,video/webm' : 'image/jpeg,image/png,image/webp,image/gif';
+  input.accept = ACCEPT[kind].join(',');
   const bar = document.createElement('div');
   bar.className = 'progress';
   bar.hidden = true;
@@ -88,7 +95,7 @@ function setupMedia(el, url) {
     current.hidden = !v;
     if (!v) return;
     let thumb;
-    if (kind === 'video') {
+    if (kind === 'video' || (kind === 'pause' && isVideoUrl(v))) {
       thumb = document.createElement('video');
       thumb.muted = true;
       thumb.preload = 'metadata';
@@ -111,6 +118,11 @@ function setupMedia(el, url) {
     const file = input.files[0];
     if (!file) return;
     err.textContent = '';
+    if (!ACCEPT[kind].includes(file.type)) {
+      err.textContent = `Formato não aceito neste campo (${file.type || 'desconhecido'}). Envie ${ACCEPT_LABEL[kind]}.`;
+      input.value = '';
+      return;
+    }
     bar.hidden = false;
     bar.firstChild.style.width = '0';
     pending++;
