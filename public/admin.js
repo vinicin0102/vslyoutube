@@ -155,6 +155,76 @@ function addRow(t = {}) {
 
 const syncEmpty = () => ($('#tempty').hidden = $('#tlist').children.length > 0);
 
+/* ---------- imagens de depoimentos (várias de uma vez) ---------- */
+
+let gallery = [];
+
+function renderGallery() {
+  const box = $('#gallery');
+  box.replaceChildren(...gallery.map((url, i) => {
+    const item = document.createElement('div');
+    item.className = 'gitem';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = `Depoimento ${i + 1}`;
+    img.loading = 'lazy';
+    const bar = document.createElement('div');
+    bar.className = 'gbar';
+    const btn = (label, aria, fn, cls = '') => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.setAttribute('aria-label', aria);
+      b.className = cls;
+      b.onclick = fn;
+      return b;
+    };
+    const move = (to) => () => {
+      if (to < 0 || to >= gallery.length) return;
+      [gallery[i], gallery[to]] = [gallery[to], gallery[i]];
+      dirty = true;
+      renderGallery();
+    };
+    bar.append(
+      btn('←', 'Mover para antes', move(i - 1)),
+      btn('→', 'Mover para depois', move(i + 1)),
+      btn('✕', 'Remover imagem', () => { gallery.splice(i, 1); dirty = true; renderGallery(); }, 'danger'),
+    );
+    item.append(img, bar);
+    return item;
+  }));
+}
+
+$('#gallery-input').addEventListener('change', async (ev) => {
+  const files = [...ev.target.files];
+  ev.target.value = '';
+  if (!files.length) return;
+  const bar = $('#gallery-progress');
+  const err = $('#gallery-err');
+  const fails = [];
+  err.textContent = '';
+  bar.hidden = false;
+  pending++;
+  syncSave();
+  for (const [n, file] of files.entries()) {
+    try {
+      const url = await uploadFile(file, 'image', (p) => {
+        bar.firstChild.style.width = ((n + p / 100) / files.length) * 100 + '%';
+      });
+      gallery.push(url);
+      dirty = true;
+      renderGallery();
+    } catch (ex) {
+      fails.push(`${file.name}: ${ex.message}`);
+    }
+  }
+  pending--;
+  bar.hidden = true;
+  bar.firstChild.style.width = '0';
+  syncSave();
+  if (fails.length) err.textContent = 'Não enviadas — ' + fails.join(' · ');
+});
+
 /* ---------- formulário ---------- */
 
 /** 750 -> "12:30"; 3900 -> "1:05:00" */
@@ -194,6 +264,9 @@ function fill(d) {
   setupMedia($('[data-media=logo]'), d.logo);
   setupMedia($('[data-media=video_file]'), d.video.file);
   setupMedia($('[data-media=pause_image]'), d.video.pause_image);
+  gallery = [...(d.testimonial_images || [])];
+  renderGallery();
+  $('#gallery-err').textContent = '';
   $('#tlist').replaceChildren();
   d.testimonials.forEach(addRow);
   syncEmpty();
@@ -228,6 +301,7 @@ function collect() {
       hide_below: f.cta_hide_below.checked,
     },
     testimonials_title: val('testimonials_title'),
+    testimonial_images: gallery,
     testimonials: $$('#tlist .trow').map((row) => ({
       id: row.dataset.id,
       name: $('[data-f=name]', row).value,

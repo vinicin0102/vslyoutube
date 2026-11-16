@@ -45,8 +45,10 @@ Depois de mudar uma variável, faça um **Redeploy** para ela valer.
   de player conta o tempo de página aberta. Opcionalmente, depoimentos e rodapé
   também ficam escondidos até o pitch. Quem já chegou no pitch vê tudo direto
   ao voltar (mudar o tempo do pitch zera isso).
-- **Depoimentos**: nome, cidade, estrelas, texto, foto do cliente e imagem
-  extra; adicionar, excluir e reordenar.
+- **Depoimentos**: imagens enviadas várias de uma vez (prints de WhatsApp,
+  Instagram etc., em duas colunas no computador e uma no celular) e
+  depoimentos escritos com nome, cidade, estrelas, texto, foto e imagem extra;
+  adicionar, excluir e reordenar.
 - **Rodapé** e **código no `<head>`** (Meta Pixel, UTMify, Google Tag).
 
 Alterações aparecem na página pública em até ~1 minuto (cache do CDN). O botão

@@ -108,8 +108,16 @@
 
       <section class="card">
         <h2>Depoimentos</h2>
-        <p class="hint">Aparecem abaixo do vídeo, na ordem desta lista.</p>
-        <label>Título da seção<input name="testimonials_title" maxlength="120"></label>
+        <p class="hint">Aparecem abaixo do vídeo: primeiro as imagens, depois os depoimentos escritos, na ordem destas listas.</p>
+        <label>Título da seção <small>(deixe vazio para esconder)</small><input name="testimonials_title" maxlength="120"></label>
+        <div class="gallery-field">
+          <span class="media-label">Imagens de depoimentos <small>(prints de WhatsApp, Instagram, e-mail… selecione várias de uma vez)</small></span>
+          <div class="gallery" id="gallery"></div>
+          <input type="file" id="gallery-input" multiple accept="image/jpeg,image/png,image/webp,image/gif">
+          <div class="progress" id="gallery-progress" hidden><div></div></div>
+          <div class="media-err" id="gallery-err"></div>
+        </div>
+        <span class="media-label" style="margin-top:18px">Depoimentos escritos</span>
         <div id="tlist"></div>
         <p class="empty" id="tempty">Nenhum depoimento ainda.</p>
         <button type="button" class="add" id="tadd">+ Adicionar depoimento</button>
