@@ -24,7 +24,8 @@ dev/server.mjs     servidor local para testes (npm run dev)
 |---|---|
 | `ADMIN_PASSWORD` | senha do painel |
 | `SESSION_SECRET` | texto aleatório longo usado para assinar a sessão |
-| `BLOB_READ_WRITE_TOKEN` | criada automaticamente ao conectar um Blob store ao projeto |
+| `BLOB_STORE_ID` / `BLOB_READ_WRITE_TOKEN` | criadas automaticamente ao conectar um Blob store ao projeto |
+| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | criadas ao conectar um banco **Upstash Redis** (métricas) |
 
 Trocar `ADMIN_PASSWORD` ou `SESSION_SECRET` desconecta todas as sessões.
 Depois de mudar uma variável, faça um **Redeploy** para ela valer.
@@ -53,6 +54,29 @@ Depois de mudar uma variável, faça um **Redeploy** para ela valer.
 
 Alterações aparecem na página pública em até ~1 minuto (cache do CDN). O botão
 "Ver página" do painel abre uma versão sem cache logo depois de salvar.
+
+## Métricas (aba "Métricas" do painel)
+
+Precisa de um banco **Upstash Redis** conectado ao projeto (Vercel → Storage →
+Create Database → Upstash → Redis, plano grátis) e um Redeploy.
+
+- **Números**: visualizações, visitantes únicos, play rate, engajamento médio,
+  quantos chegaram no pitch, quantos assistiram até o final e cliques no botão.
+- **Curva de retenção** com a marcação do pitch; passe o mouse (ou use as
+  setas) para ver quantos ainda assistiam em cada momento. Só conta tempo
+  assistido em sequência — pular para a frente não infla a curva.
+- **Visualizações por dia**, **dispositivo** e **origem** (`utm_source` do link
+  ou o site de onde a pessoa veio).
+- Períodos: hoje, ontem, 7, 30 e 90 dias (fuso de Brasília).
+- **Zerar métricas** começa uma contagem nova (útil ao trocar o vídeo).
+
+Como funciona: a página envia o estado da visita (`/api/t`) ao abrir, ao dar
+play, ao chegar no pitch, ao clicar no botão e a cada ~15 s de vídeo — um único
+comando no Redis por envio. Dias encerrados viram um resumo pronto, então os
+relatórios ficam rápidos. Visitas com `?v=` ou `?notrack` no link (como o "Ver
+página" do painel) não são contadas. Com código de player externo (VTurb,
+Panda) só dá para contar visitas e cliques, porque esses players não informam o
+tempo assistido.
 
 ## Segurança
 

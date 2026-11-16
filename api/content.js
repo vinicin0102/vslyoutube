@@ -17,7 +17,8 @@ export async function PUT(request) {
     return json({ error: 'Dados inválidos.' }, 400);
   }
   const old = await loadContent().catch(() => null);
-  const next = sanitize({ ...body, updatedAt: Date.now() });
+  // O contador de métricas só muda por "Zerar métricas" (api/metrics.js).
+  const next = sanitize({ ...body, metrics_epoch: old?.metrics_epoch ?? 0, updatedAt: Date.now() });
   try {
     await saveContent(next);
   } catch (err) {

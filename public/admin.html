@@ -30,13 +30,58 @@
 <div id="view-editor" hidden>
   <header class="bar">
     <h1>Painel da VSL</h1>
+    <nav class="tabs" aria-label="Seções do painel">
+      <button type="button" class="tab" data-tab="edit" aria-current="page">Página</button>
+      <button type="button" class="tab" data-tab="metrics">Métricas</button>
+    </nav>
     <div class="right">
       <a class="btn" id="view-page" href="/" target="_blank" rel="noopener">Ver página ↗</a>
       <button type="button" id="logout">Sair</button>
     </div>
   </header>
 
-  <main>
+  <main id="tab-metrics" hidden>
+    <div class="mbar">
+      <div class="seg" role="radiogroup" aria-label="Período">
+        <label><input type="radio" name="m_range" value="today"><span>Hoje</span></label>
+        <label><input type="radio" name="m_range" value="yesterday"><span>Ontem</span></label>
+        <label><input type="radio" name="m_range" value="7d" checked><span>7 dias</span></label>
+        <label><input type="radio" name="m_range" value="30d"><span>30 dias</span></label>
+        <label><input type="radio" name="m_range" value="90d"><span>90 dias</span></label>
+      </div>
+      <button type="button" id="m-refresh">Atualizar</button>
+    </div>
+    <div id="m-msg" aria-live="polite"></div>
+    <div id="m-body" hidden>
+      <div class="kpis" id="kpis"></div>
+
+      <section class="card">
+        <h2>Retenção do vídeo</h2>
+        <p class="hint" id="ret-hint">Porcentagem de quem deu play que ainda estava assistindo em cada momento. Pular o vídeo para a frente não conta.</p>
+        <div class="chart" id="ret-chart"></div>
+        <details class="tview"><summary>Ver em tabela</summary><div class="tscroll"><table id="ret-table"></table></div></details>
+      </section>
+
+      <section class="card">
+        <h2>Visualizações por dia</h2>
+        <div class="chart" id="daily-chart"></div>
+        <details class="tview"><summary>Ver em tabela</summary><div class="tscroll"><table id="daily-table"></table></div></details>
+      </section>
+
+      <div class="grid2 cards2">
+        <section class="card"><h2>Dispositivo</h2><div class="tscroll"><table id="dev-table"></table></div></section>
+        <section class="card"><h2>Origem</h2><p class="hint">Pelo <code>utm_source</code> do link ou pelo site de onde a pessoa veio.</p><div class="tscroll"><table id="src-table"></table></div></section>
+      </div>
+
+      <section class="card">
+        <h2>Zerar métricas</h2>
+        <p class="hint">Começa uma contagem nova — útil ao trocar o vídeo, porque a retenção mistura vídeos diferentes. Os dados atuais deixam de aparecer.</p>
+        <button type="button" class="danger" id="m-reset">Zerar métricas</button>
+      </section>
+    </div>
+  </main>
+
+  <main id="tab-edit">
     <div id="msgs" aria-live="polite"></div>
 
     <form id="f" novalidate>
@@ -168,5 +213,6 @@
 </template>
 
 <script type="module" src="/admin.js"></script>
+<script type="module" src="/metrics.js"></script>
 </body>
 </html>
