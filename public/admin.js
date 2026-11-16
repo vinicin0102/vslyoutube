@@ -5,6 +5,7 @@ const LAST_SAVED = 'vsl_last_saved';
 
 let localUploads = false;
 let storageWarning = '';
+let uploadModeName = 'presigned';
 let pending = 0; // uploads em andamento
 let dirty = false;
 
@@ -50,7 +51,8 @@ async function uploadFile(file, kind, onProgress) {
     return (await res.json()).url;
   }
   blobClient ??= await import('/vendor/blob-client.js');
-  const blob = await blobClient.upload('vsl/uploads/' + safe, file, {
+  const send = uploadModeName === 'token' ? blobClient.upload : blobClient.uploadPresigned;
+  const blob = await send('vsl/uploads/' + safe, file, {
     access: 'public',
     handleUploadUrl: '/api/upload',
     clientPayload: kind,
@@ -359,6 +361,7 @@ window.addEventListener('beforeunload', (e) => {
     const s = await api('/api/session');
     localUploads = s.localUploads;
     storageWarning = s.storageWarning || '';
+    uploadModeName = s.uploadMode || 'presigned';
     if (!s.configured) return show('view-setup');
     if (!s.logged) return show('view-login');
     await loadEditor();
