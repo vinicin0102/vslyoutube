@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel da VSL</title>
+<link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+
+<main class="login" id="view-setup" hidden>
+  <section class="card">
+    <h2>Configure o painel</h2>
+    <p class="hint">Na Vercel, em <b>Settings → Environment Variables</b>, crie <code>ADMIN_PASSWORD</code> (sua senha) e <code>SESSION_SECRET</code> (um texto aleatório longo) e faça um novo deploy.</p>
+  </section>
+</main>
+
+<main class="login" id="view-login" hidden>
+  <div id="login-msg"></div>
+  <section class="card">
+    <h2>Painel da VSL</h2>
+    <form id="login-form">
+      <label>Senha<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="primary" type="submit">Entrar</button>
+    </form>
+  </section>
+</main>
+
+<div id="view-editor" hidden>
+  <header class="bar">
+    <h1>Painel da VSL</h1>
+    <div class="right">
+      <a class="btn" id="view-page" href="/" target="_blank" rel="noopener">Ver página ↗</a>
+      <button type="button" id="logout">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="msgs" aria-live="polite"></div>
+
+    <form id="f" novalidate>
+      <section class="card">
+        <h2>Marca</h2>
+        <p class="hint">O logo aparece na barra do topo. Sem logo, aparece o nome da marca.</p>
+        <label>Nome da marca<input name="brand_name" maxlength="80"></label>
+        <div class="media" data-media="logo" data-kind="image">
+          <span class="media-label">Logo <small>(PNG com fundo transparente fica melhor no preto)</small></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Topo da página</h2>
+        <label>Selo acima do título <small>(deixe vazio para esconder)</small><input name="badge" maxlength="120"></label>
+        <label>Título<textarea name="title" rows="2" maxlength="300"></textarea></label>
+        <label>Linha de apoio<input name="subtitle" maxlength="300"></label>
+      </section>
+
+      <section class="card">
+        <h2>Vídeo</h2>
+        <p class="hint">Use um link, envie o arquivo ou cole o código do player (VTurb, Panda, ConverteAI…).</p>
+        <div class="seg" role="radiogroup" aria-label="Origem do vídeo">
+          <label><input type="radio" name="video_type" value="url"><span>Link</span></label>
+          <label><input type="radio" name="video_type" value="upload"><span>Enviar arquivo</span></label>
+          <label><input type="radio" name="video_type" value="embed"><span>Código do player</span></label>
+        </div>
+        <div class="pane" data-pane="url">
+          <label>Link do vídeo <small>(YouTube, Vimeo, link direto .mp4 ou link do player)</small>
+            <input type="url" name="video_url" placeholder="https://"></label>
+        </div>
+        <div class="pane" data-pane="upload">
+          <div class="media" data-media="video_file" data-kind="video">
+            <span class="media-label">Arquivo MP4 ou WEBM <small>(até 1 GB)</small></span>
+          </div>
+        </div>
+        <div class="pane" data-pane="embed">
+          <label>Código do player<textarea class="code" name="video_embed" rows="6" placeholder='<div id="vid_..."></div><script ...></script>'></textarea></label>
+        </div>
+        <label>Formato
+          <select name="video_ratio">
+            <option value="9:16">Vertical 9:16 (celular)</option>
+            <option value="4:5">Vertical 4:5</option>
+            <option value="1:1">Quadrado 1:1</option>
+            <option value="16:9">Horizontal 16:9</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="card">
+        <h2>Botão de compra</h2>
+        <p class="hint">Com atraso, o botão aparece depois desse tempo de vídeo (arquivo/MP4) ou de página aberta (YouTube, players externos).</p>
+        <label class="inline"><input type="checkbox" name="cta_enabled"> Mostrar botão</label>
+        <div class="grid2">
+          <label>Texto do botão<input name="cta_text" maxlength="80"></label>
+          <label>Link do checkout<input type="url" name="cta_url" placeholder="https://"></label>
+        </div>
+        <div class="grid2">
+          <label>Aparecer depois de (segundos)<input type="number" name="cta_delay" min="0" max="36000"></label>
+          <label>Cor<input type="color" name="cta_color"></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Depoimentos</h2>
+        <p class="hint">Aparecem abaixo do vídeo, na ordem desta lista.</p>
+        <label>Título da seção<input name="testimonials_title" maxlength="120"></label>
+        <div id="tlist"></div>
+        <p class="empty" id="tempty">Nenhum depoimento ainda.</p>
+        <button type="button" class="add" id="tadd">+ Adicionar depoimento</button>
+      </section>
+
+      <section class="card">
+        <h2>Rodapé</h2>
+        <label>Texto do rodapé <small>(empresa, CNPJ, contato)</small><textarea name="footer_text" rows="3" maxlength="2000"></textarea></label>
+        <label>Aviso legal<textarea name="disclaimer" rows="3" maxlength="2000"></textarea></label>
+      </section>
+
+      <section class="card">
+        <h2>Avançado</h2>
+        <label>Código no &lt;head&gt; <small>(Meta Pixel, UTMify, Google Tag)</small><textarea class="code" name="head_code" rows="5"></textarea></label>
+      </section>
+
+      <div class="savebar"><button class="primary" type="submit" id="save">Salvar alterações</button></div>
+    </form>
+  </main>
+</div>
+
+<template id="ttpl">
+  <div class="trow">
+    <div class="trow-head">
+      <strong class="trow-title">Novo depoimento</strong>
+      <div class="trow-actions">
+        <button type="button" class="icon" data-move="-1" aria-label="Mover para cima">↑</button>
+        <button type="button" class="icon" data-move="1" aria-label="Mover para baixo">↓</button>
+        <button type="button" class="icon danger" data-remove aria-label="Excluir depoimento">✕</button>
+      </div>
+    </div>
+    <div class="grid2">
+      <label>Nome<input data-f="name" maxlength="80"></label>
+      <label>Cidade / detalhe <small>(opcional)</small><input data-f="city" maxlength="80" placeholder="Ex.: Curitiba, PR"></label>
+    </div>
+    <label>Depoimento<textarea data-f="text" rows="3" maxlength="3000"></textarea></label>
+    <div class="grid3">
+      <label>Estrelas
+        <select data-f="rating">
+          <option value="0">Sem estrelas</option><option value="1">★</option><option value="2">★★</option>
+          <option value="3">★★★</option><option value="4">★★★★</option><option value="5">★★★★★</option>
+        </select>
+      </label>
+      <div class="media" data-media="photo" data-kind="image" data-round><span class="media-label">Foto do cliente</span></div>
+      <div class="media" data-media="proof" data-kind="image"><span class="media-label">Imagem extra <small>(print, resultado)</small></span></div>
+    </div>
+  </div>
+</template>
+
+<script type="module" src="/admin.js"></script>
+</body>
+</html>
