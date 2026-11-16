@@ -60,3 +60,4 @@ button.danger:hover { background: #3a1616; border-color: #6b2222; color: var(--e
 .empty { color: var(--muted); font-size: 13px; padding: 14px 0 0; }
 .login { max-width: 380px; margin: 12vh auto 0; }
 .login button { width: 100%; margin-top: 16px; }
+.field-err { color: var(--err); font-size: 12px; margin-top: 4px; }

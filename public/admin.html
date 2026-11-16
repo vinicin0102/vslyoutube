@@ -76,6 +76,9 @@
         <div class="pane" data-pane="embed">
           <label>Código do player<textarea class="code" name="video_embed" rows="6" placeholder='<div id="vid_..."></div><script ...></script>'></textarea></label>
         </div>
+        <div class="media" data-media="pause_image" data-kind="image">
+          <span class="media-label">Imagem ao pausar <small>(cobre o vídeo quando a pessoa pausa; clicar nela volta a tocar. Use o mesmo formato do vídeo. Funciona com arquivo enviado, link .mp4, YouTube e Vimeo — não com código de player)</small></span>
+        </div>
         <label>Formato
           <select name="video_ratio">
             <option value="9:16">Vertical 9:16 (celular)</option>
@@ -87,17 +90,20 @@
       </section>
 
       <section class="card">
-        <h2>Botão de compra</h2>
-        <p class="hint">Com atraso, o botão aparece depois desse tempo de vídeo (arquivo/MP4) ou de página aberta (YouTube, players externos).</p>
-        <label class="inline"><input type="checkbox" name="cta_enabled"> Mostrar botão</label>
+        <h2>Oferta e momento do pitch</h2>
+        <p class="hint">A oferta aparece quando o vídeo chega no momento do pitch. Com arquivo enviado, YouTube e Vimeo conta o tempo assistido; com código de player conta o tempo de página aberta. Quem já chegou no pitch vê a oferta direto ao voltar.</p>
+        <label class="inline"><input type="checkbox" name="cta_enabled"> Mostrar botão da oferta</label>
+        <div class="grid2">
+          <label>Momento do pitch <small>(min:seg — vazio ou 0:00 mostra desde o início)</small><input name="cta_pitch" inputmode="numeric" placeholder="Ex.: 12:30" maxlength="8"></label>
+          <label>Cor do botão<input type="color" name="cta_color"></label>
+        </div>
+        <div class="field-err" id="pitch-err" hidden>Use o formato min:seg, por exemplo 12:30 ou 1:05:00.</div>
+        <label>Texto acima do botão <small>(opcional — preço, bônus, garantia)</small><textarea name="cta_offer_text" rows="2" maxlength="300" placeholder="Ex.: De R$ 297 por apenas R$ 97"></textarea></label>
         <div class="grid2">
           <label>Texto do botão<input name="cta_text" maxlength="80"></label>
           <label>Link do checkout<input type="url" name="cta_url" placeholder="https://"></label>
         </div>
-        <div class="grid2">
-          <label>Aparecer depois de (segundos)<input type="number" name="cta_delay" min="0" max="36000"></label>
-          <label>Cor<input type="color" name="cta_color"></label>
-        </div>
+        <label class="inline" style="margin-top:14px"><input type="checkbox" name="cta_hide_below"> Esconder depoimentos e rodapé até o pitch</label>
       </section>
 
       <section class="card">

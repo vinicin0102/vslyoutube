@@ -116,7 +116,7 @@ function setupMedia(el, url) {
     try {
       el.dataset.value = await uploadFile(file, kind, (p) => (bar.firstChild.style.width = p + '%'));
       dirty = true;
-      if (el.dataset.media === 'video_file') $('input[name=video_type][value=upload]').checked = true;
+      if (el.dataset.media === 'video_file') { $('input[name=video_type][value=upload]').checked = true; syncPanes(); }
       paint();
     } catch (ex) {
       err.textContent = 'Falha no envio: ' + ex.message;
@@ -155,6 +155,25 @@ const syncEmpty = () => ($('#tempty').hidden = $('#tlist').children.length > 0);
 
 /* ---------- formulário ---------- */
 
+/** 750 -> "12:30"; 3900 -> "1:05:00" */
+function fmtTime(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  if (!sec) return '';
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  const pad = (n) => String(n).padStart(2, '0');
+  return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+
+/** "12:30" / "1:05:00" / "90" -> segundos; null se inválido. */
+function parseTime(txt) {
+  txt = String(txt || '').trim();
+  if (!txt) return 0;
+  if (!/^\d{1,5}(:\d{1,2}){0,2}$/.test(txt)) return null;
+  const parts = txt.split(':').map(Number);
+  if (parts.slice(1).some((n) => n > 59)) return null;
+  return parts.reduce((acc, n) => acc * 60 + n, 0);
+}
+
 function fill(d) {
   const f = $('#f').elements;
   for (const k of ['brand_name', 'badge', 'title', 'subtitle', 'testimonials_title', 'footer_text', 'disclaimer', 'head_code']) f[k].value = d[k] ?? '';
@@ -165,10 +184,14 @@ function fill(d) {
   f.cta_enabled.checked = d.cta.enabled;
   f.cta_text.value = d.cta.text;
   f.cta_url.value = d.cta.url;
-  f.cta_delay.value = d.cta.delay;
+  f.cta_pitch.value = fmtTime(d.cta.delay);
   f.cta_color.value = d.cta.color;
+  f.cta_offer_text.value = d.cta.offer_text || '';
+  f.cta_hide_below.checked = Boolean(d.cta.hide_below);
+  $('#pitch-err').hidden = true;
   setupMedia($('[data-media=logo]'), d.logo);
   setupMedia($('[data-media=video_file]'), d.video.file);
+  setupMedia($('[data-media=pause_image]'), d.video.pause_image);
   $('#tlist').replaceChildren();
   d.testimonials.forEach(addRow);
   syncEmpty();
@@ -191,13 +214,16 @@ function collect() {
       file: $('[data-media=video_file]').dataset.value,
       embed: val('video_embed'),
       ratio: val('video_ratio'),
+      pause_image: $('[data-media=pause_image]').dataset.value,
     },
     cta: {
       enabled: f.cta_enabled.checked,
       text: val('cta_text'),
       url: val('cta_url').trim(),
-      delay: Number(val('cta_delay')) || 0,
+      delay: parseTime(val('cta_pitch')) ?? 0,
       color: val('cta_color'),
+      offer_text: val('cta_offer_text'),
+      hide_below: f.cta_hide_below.checked,
     },
     testimonials_title: val('testimonials_title'),
     testimonials: $$('#tlist .trow').map((row) => ({
@@ -295,6 +321,9 @@ $('#f').addEventListener('input', () => (dirty = true));
 $('#f').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   if (pending > 0) return;
+  const pitchOk = parseTime($('#f').elements.cta_pitch.value) !== null;
+  $('#pitch-err').hidden = pitchOk;
+  if (!pitchOk) return $('#f').elements.cta_pitch.focus();
   const data = collect();
   const btn = $('#save');
   btn.disabled = true;

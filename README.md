@@ -36,9 +36,15 @@ Depois de mudar uma variável, faça um **Redeploy** para ela valer.
 - **Vídeo**: link (YouTube, Vimeo, `.mp4` direto ou link de player), envio de
   arquivo MP4/WEBM de até 1 GB, ou o código de embed do VTurb/Panda. Formato
   9:16, 4:5, 1:1 ou 16:9.
-- **Botão de compra**: texto, link do checkout, cor e atraso em segundos. Com
-  vídeo próprio o atraso conta o tempo assistido; com YouTube/players externos
-  conta o tempo de página aberta. Quem já viu o botão volta a vê-lo direto.
+- **Imagem ao pausar**: cobre o vídeo sempre que a pessoa pausa; clicar nela
+  volta a tocar. Funciona com arquivo enviado, link `.mp4`, YouTube e Vimeo
+  (não com código de player, que não avisa quando pausa).
+- **Oferta e momento do pitch**: o botão (com texto opcional acima, como preço
+  ou bônus) aparece quando o vídeo chega no tempo informado em `min:seg`.
+  Com arquivo enviado, YouTube e Vimeo conta o tempo **assistido**; com código
+  de player conta o tempo de página aberta. Opcionalmente, depoimentos e rodapé
+  também ficam escondidos até o pitch. Quem já chegou no pitch vê tudo direto
+  ao voltar (mudar o tempo do pitch zera isso).
 - **Depoimentos**: nome, cidade, estrelas, texto, foto do cliente e imagem
   extra; adicionar, excluir e reordenar.
 - **Rodapé** e **código no `<head>`** (Meta Pixel, UTMify, Google Tag).
