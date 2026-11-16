@@ -22,7 +22,7 @@ export async function PUT(request) {
     await saveContent(next);
   } catch (err) {
     console.error('Falha ao salvar:', err);
-    return json({ error: 'Não foi possível salvar. Confira se o Blob está conectado ao projeto.' }, 500);
+    return json({ error: err.expose ? err.message : 'Não foi possível salvar. Confira se o Blob está conectado ao projeto.' }, 500);
   }
   // Apaga do Blob os arquivos que foram trocados ou removidos.
   if (old) {

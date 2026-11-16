@@ -4,6 +4,7 @@ const HDR = { 'content-type': 'application/json', 'x-vsl': '1' };
 const LAST_SAVED = 'vsl_last_saved';
 
 let localUploads = false;
+let storageWarning = '';
 let pending = 0; // uploads em andamento
 let dirty = false;
 
@@ -235,6 +236,7 @@ async function loadEditor() {
     if (last && last.updatedAt > (d.updatedAt || 0)) d = last;
   } catch {}
   fill(d);
+  if (storageWarning) flash($('#msgs'), 'err', storageWarning);
 }
 
 /* ---------- eventos ---------- */
@@ -327,6 +329,7 @@ window.addEventListener('beforeunload', (e) => {
   try {
     const s = await api('/api/session');
     localUploads = s.localUploads;
+    storageWarning = s.storageWarning || '';
     if (!s.configured) return show('view-setup');
     if (!s.logged) return show('view-login');
     await loadEditor();
