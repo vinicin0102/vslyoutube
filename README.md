@@ -57,8 +57,22 @@ Alterações aparecem na página pública em até ~1 minuto (cache do CDN). O bo
 
 ## Métricas (aba "Métricas" do painel)
 
-Precisa de um banco **Upstash Redis** conectado ao projeto (Vercel → Storage →
-Create Database → Upstash → Redis, plano grátis) e um Redeploy.
+Precisa de um banco para gravar as visitas. Duas opções (o Supabase tem
+prioridade se os dois estiverem configurados):
+
+**Supabase**
+1. No projeto do Supabase, abra **SQL Editor → New query**, cole o conteúdo de
+   `sql/supabase-metricas.sql` e clique em **Run** (pode rodar de novo sem problema).
+2. Em **Project Settings → API**, copie a **Project URL** e a chave **secreta**
+   (`service_role` ou `sb_secret_...`; nunca a `anon`/publishable).
+3. Na Vercel, em **Settings → Environment Variables**, crie `SUPABASE_URL` e
+   `SUPABASE_SERVICE_ROLE_KEY` (marque como *Sensitive*) e faça **Redeploy**.
+
+A tabela fica com RLS ligado e sem acesso para `anon`: só o servidor do site,
+com a chave secreta, lê e grava.
+
+**Upstash Redis**: Vercel → Storage → Create Database → Upstash → Redis (plano
+grátis), conecte ao projeto e faça Redeploy.
 
 - **Números**: visualizações, visitantes únicos, play rate, engajamento médio,
   quantos chegaram no pitch, quantos assistiram até o final e cliques no botão.
