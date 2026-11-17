@@ -176,7 +176,8 @@
 
       <section class="card">
         <h2>Avançado</h2>
-        <label>Código no &lt;head&gt; <small>(Meta Pixel, UTMify, Google Tag)</small><textarea class="code" name="head_code" rows="5"></textarea></label>
+        <label>ID do Meta Pixel <small>(só os números — dispara PageView, VideoPlay, VideoProgress 25/50/75%, ViewContent + Pitch no pitch e InitiateCheckout no botão. Não cole o código do pixel abaixo se usar este campo, senão os eventos duplicam)</small><input name="meta_pixel_id" inputmode="numeric" maxlength="20" placeholder="Ex.: 2333279314171577"></label>
+        <label>Código no &lt;head&gt; <small>(UTMify, Google Tag, outros pixels)</small><textarea class="code" name="head_code" rows="5"></textarea></label>
       </section>
 
       <div class="savebar"><button class="primary" type="submit" id="save">Salvar alterações</button></div>

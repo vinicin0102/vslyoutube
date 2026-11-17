@@ -260,7 +260,7 @@ function parseTime(txt) {
 
 function fill(d) {
   const f = $('#f').elements;
-  for (const k of ['brand_name', 'badge', 'title', 'subtitle', 'testimonials_title', 'footer_text', 'disclaimer', 'head_code']) f[k].value = d[k] ?? '';
+  for (const k of ['brand_name', 'badge', 'title', 'subtitle', 'testimonials_title', 'footer_text', 'disclaimer', 'head_code', 'meta_pixel_id']) f[k].value = d[k] ?? '';
   f.video_url.value = d.video.url;
   f.video_embed.value = d.video.embed;
   f.video_ratio.value = d.video.ratio;
@@ -326,6 +326,7 @@ function collect() {
     footer_text: val('footer_text'),
     disclaimer: val('disclaimer'),
     head_code: val('head_code'),
+    meta_pixel_id: val('meta_pixel_id').trim(),
   };
 }
 
