@@ -46,7 +46,16 @@ http.createServer(async (req, res) => {
       : path.join(ROOT, 'public', path.normalize(p));
     if (!file.startsWith(ROOT)) return send(res, 404, {});
     const data = await readFile(file);
-    res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' });
+    const type = TYPES[path.extname(file)] || 'application/octet-stream';
+    // Suporte a Range, como o CDN do Blob: necessário para pular no vídeo.
+    const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (m) {
+      const start = m[1] ? Number(m[1]) : data.length - Number(m[2]);
+      const end = m[1] && m[2] ? Math.min(Number(m[2]), data.length - 1) : data.length - 1;
+      res.writeHead(206, { 'content-type': type, 'accept-ranges': 'bytes', 'content-range': `bytes ${start}-${end}/${data.length}`, 'content-length': end - start + 1 });
+      return res.end(data.subarray(start, end + 1));
+    }
+    res.writeHead(200, { 'content-type': type, 'accept-ranges': 'bytes', 'content-length': data.length });
     res.end(data);
   } catch (err) {
     if (err.code === 'ENOENT' || err.code === 'ERR_MODULE_NOT_FOUND') return send(res, 404, { error: 'Não encontrado' });
