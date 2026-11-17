@@ -22,6 +22,29 @@ create table if not exists public.vsl_sessions (
 alter table public.vsl_sessions enable row level security;
 revoke all on public.vsl_sessions from anon, authenticated;
 
+-- Grava uma visita. Só acumula: play, pitch e clique nunca são desmarcados e o
+-- tempo assistido só aumenta — envios que chegam fora de ordem não apagam nada.
+create or replace function public.vsl_track(
+  p_epoch int, p_day date, p_sid text, p_uid text, p_dev text, p_src text,
+  p_played boolean, p_max_sec int, p_dur int, p_pitch boolean, p_cta boolean
+) returns void
+language sql
+set search_path = public
+as $$
+  insert into public.vsl_sessions as v (epoch, day, sid, uid, dev, src, played, max_sec, dur, pitch, cta)
+  values (p_epoch, p_day, p_sid, p_uid, p_dev, p_src, p_played, p_max_sec, p_dur, p_pitch, p_cta)
+  on conflict (epoch, day, sid) do update set
+    played     = v.played or excluded.played,
+    max_sec    = greatest(v.max_sec, excluded.max_sec),
+    dur        = greatest(v.dur, excluded.dur),
+    pitch      = v.pitch or excluded.pitch,
+    cta        = v.cta or excluded.cta,
+    updated_at = now();
+$$;
+
+revoke all on function public.vsl_track(int, date, text, text, text, text, boolean, int, int, boolean, boolean) from public, anon, authenticated;
+grant execute on function public.vsl_track(int, date, text, text, text, text, boolean, int, int, boolean, boolean) to service_role;
+
 -- Relatório de um período, calculado no banco.
 create or replace function public.vsl_report(p_epoch int, p_from date, p_to date)
 returns json
@@ -64,3 +87,6 @@ $$;
 
 revoke all on function public.vsl_report(int, date, date) from public, anon, authenticated;
 grant execute on function public.vsl_report(int, date, date) to service_role;
+
+-- Avisa a API do Supabase para enxergar a tabela nova na hora.
+notify pgrst, 'reload schema';

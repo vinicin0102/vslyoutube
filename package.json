@@ -10,7 +10,8 @@
     "bundle": "esbuild dev/blob-client-entry.js --bundle --format=esm --platform=browser --minify --outfile=public/vendor/blob-client.js"
   },
   "dependencies": {
-    "@vercel/blob": "2.9.0"
+    "@vercel/blob": "2.9.0",
+    "postgres": "3.4.7"
   },
   "devDependencies": {
     "esbuild": "0.25.12"

@@ -60,7 +60,12 @@ Alterações aparecem na página pública em até ~1 minuto (cache do CDN). O bo
 Precisa de um banco para gravar as visitas. Duas opções (o Supabase tem
 prioridade se os dois estiverem configurados):
 
-**Supabase**
+**Supabase pela integração da Vercel (mais fácil)**: Vercel → Storage →
+Create Database → Supabase, conecte ao projeto e faça Redeploy. A integração
+cria as variáveis sozinha e o site cria a tabela na primeira visita (usa a
+conexão `POSTGRES_URL_NON_POOLING` só para isso).
+
+**Supabase que você já tem**
 1. No projeto do Supabase, abra **SQL Editor → New query**, cole o conteúdo de
    `sql/supabase-metricas.sql` e clique em **Run** (pode rodar de novo sem problema).
 2. Em **Project Settings → API**, copie a **Project URL** e a chave **secreta**
