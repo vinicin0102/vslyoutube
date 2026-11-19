@@ -66,8 +66,9 @@ async function uploadFile(file, kind, onProgress) {
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const VIDEO_TYPES = ['video/mp4', 'video/webm'];
 // Tipos aceitos por campo: "pause" aceita imagem ou vídeo curto.
-const ACCEPT = { image: IMAGE_TYPES, video: VIDEO_TYPES, pause: [...IMAGE_TYPES, ...VIDEO_TYPES] };
-const ACCEPT_LABEL = { image: 'JPG, PNG, WEBP ou GIF', video: 'MP4 ou WEBM', pause: 'JPG, PNG, WEBP, GIF, MP4 ou WEBM' };
+const ICON_TYPES = [...IMAGE_TYPES, 'image/x-icon', 'image/vnd.microsoft.icon'];
+const ACCEPT = { image: IMAGE_TYPES, video: VIDEO_TYPES, pause: [...IMAGE_TYPES, ...VIDEO_TYPES], icon: ICON_TYPES };
+const ACCEPT_LABEL = { image: 'JPG, PNG, WEBP ou GIF', video: 'MP4 ou WEBM', pause: 'JPG, PNG, WEBP, GIF, MP4 ou WEBM', icon: 'PNG, ICO, JPG, WEBP ou GIF' };
 const isVideoUrl = (u) => /\.(mp4|webm)(\?|$)/i.test(u || '');
 
 /** Campo de mídia: miniatura do arquivo atual, botão remover e seletor de arquivo. */
@@ -118,7 +119,7 @@ function setupMedia(el, url) {
     const file = input.files[0];
     if (!file) return;
     err.textContent = '';
-    if (!ACCEPT[kind].includes(file.type)) {
+    if (!ACCEPT[kind].includes(file.type) && !(kind === 'icon' && /\.ico$/i.test(file.name))) {
       err.textContent = `Formato não aceito neste campo (${file.type || 'desconhecido'}). Envie ${ACCEPT_LABEL[kind]}.`;
       input.value = '';
       return;
@@ -274,6 +275,8 @@ function fill(d) {
   f.cta_hide_below.checked = Boolean(d.cta.hide_below);
   $('#pitch-err').hidden = true;
   setupMedia($('[data-media=logo]'), d.logo);
+  setupMedia($('[data-media=favicon]'), d.favicon);
+  f.video_autoplay.checked = d.video.autoplay !== false;
   setupMedia($('[data-media=video_file]'), d.video.file);
   setupMedia($('[data-media=pause_image]'), d.video.pause_image);
   gallery = [...(d.testimonial_images || [])];
@@ -292,6 +295,7 @@ function collect() {
   return {
     brand_name: val('brand_name'),
     logo: $('[data-media=logo]').dataset.value,
+    favicon: $('[data-media=favicon]').dataset.value,
     badge: val('badge'),
     title: val('title'),
     subtitle: val('subtitle'),
@@ -301,6 +305,7 @@ function collect() {
       file: $('[data-media=video_file]').dataset.value,
       embed: val('video_embed'),
       ratio: val('video_ratio'),
+      autoplay: f.video_autoplay.checked,
       pause_image: $('[data-media=pause_image]').dataset.value,
     },
     cta: {

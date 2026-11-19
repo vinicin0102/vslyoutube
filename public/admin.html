@@ -92,6 +92,9 @@
         <div class="media" data-media="logo" data-kind="image">
           <span class="media-label">Logo <small>(PNG com fundo transparente fica melhor no preto)</small></span>
         </div>
+        <div class="media" data-media="favicon" data-kind="icon">
+          <span class="media-label">Ícone da aba do navegador (favicon) <small>(imagem quadrada, de preferência PNG 512×512 ou .ico — aparece na aba e nos favoritos)</small></span>
+        </div>
       </section>
 
       <section class="card">
@@ -124,6 +127,7 @@
         <div class="media" data-media="pause_image" data-kind="pause">
           <span class="media-label">Imagem ou vídeo ao pausar <small>(cobre o vídeo quando a pessoa pausa; clicar volta a tocar. Vídeo toca em loop, sem som — use um curto, de até ~15 s. Use o mesmo formato do vídeo principal. Funciona com arquivo enviado, link .mp4, YouTube e Vimeo — não com código de player)</small></span>
         </div>
+        <label class="inline" style="margin-top:14px"><input type="checkbox" name="video_autoplay"> Autoplay: começar a tocar sem som assim que a página abre, com o aviso "toque para ouvir" (ao tocar, volta ao início com som)</label>
         <label>Formato
           <select name="video_ratio">
             <option value="9:16">Vertical 9:16 (celular)</option>

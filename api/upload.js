@@ -12,6 +12,8 @@ import { blobConfigured, NO_BLOB_MSG, uploadMode } from '../lib/store.js';
 const KINDS = {
   image: { types: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'], max: 8 * 1024 * 1024 },
   video: { types: ['video/mp4', 'video/webm'], max: 1024 * 1024 * 1024 },
+  // Ícone da aba do navegador.
+  icon: { types: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/x-icon', 'image/vnd.microsoft.icon'], max: 2 * 1024 * 1024 },
   // Imagem ou vídeo curto que cobre o player quando a pessoa pausa.
   pause: { types: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'], max: 100 * 1024 * 1024 },
 };
