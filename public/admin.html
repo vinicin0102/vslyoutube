@@ -173,6 +173,25 @@
       </section>
 
       <section class="card">
+        <h2>Pop-up de saída</h2>
+        <p class="hint">Aparece uma vez por visitante quando ele tenta sair: no computador, quando o mouse vai para fechar a aba; no celular, quando sobe a tela rápido para a barra de endereço ou sai e volta para a página. Não aparece para quem já clicou em comprar. Para testar sem esperar, abra a página com <a href="/?teste=1" target="_blank" rel="noopener">?teste=1</a>.</p>
+        <label class="inline"><input type="checkbox" name="exit_enabled"> Mostrar pop-up de saída</label>
+        <div class="grid2">
+          <label>Só depois de (segundos na página)<input type="number" name="exit_delay" min="0" max="600"></label>
+          <label>Selo<input name="exit_tag" maxlength="60" placeholder="ESPERA!"></label>
+        </div>
+        <label>Título<input name="exit_title" maxlength="160"></label>
+        <label>Texto<textarea name="exit_text" rows="3" maxlength="600"></textarea></label>
+        <div class="media" data-media="exit_image" data-kind="image"><span class="media-label">Imagem <small>(opcional — ex.: foto do produto)</small></span></div>
+        <div class="grid2">
+          <label>Preço <small>(vazio = o mesmo da oferta; formato de 289 por 27,90)</small><input name="exit_offer_text" maxlength="200"></label>
+          <label>Texto do botão<input name="exit_button" maxlength="80"></label>
+        </div>
+        <label>Link do botão <small>(vazio = o mesmo checkout; pode ser um checkout com desconto)</small><input type="url" name="exit_url" placeholder="https://"></label>
+        <label>Linha abaixo do botão<input name="exit_note" maxlength="200"></label>
+      </section>
+
+      <section class="card">
         <h2>Rodapé</h2>
         <label>Texto do rodapé <small>(empresa, CNPJ, contato)</small><textarea name="footer_text" rows="3" maxlength="2000"></textarea></label>
         <label>Aviso legal<textarea name="disclaimer" rows="3" maxlength="2000"></textarea></label>

@@ -276,6 +276,10 @@ function fill(d) {
   $('#pitch-err').hidden = true;
   setupMedia($('[data-media=logo]'), d.logo);
   setupMedia($('[data-media=favicon]'), d.favicon);
+  const xp = d.exit_popup || {};
+  f.exit_enabled.checked = xp.enabled !== false;
+  for (const k of ['delay', 'tag', 'title', 'text', 'offer_text', 'button', 'url', 'note']) f['exit_' + k].value = xp[k] ?? '';
+  setupMedia($('[data-media=exit_image]'), xp.image);
   f.video_autoplay.checked = d.video.autoplay !== false;
   setupMedia($('[data-media=video_file]'), d.video.file);
   setupMedia($('[data-media=pause_image]'), d.video.pause_image);
@@ -296,6 +300,13 @@ function collect() {
     brand_name: val('brand_name'),
     logo: $('[data-media=logo]').dataset.value,
     favicon: $('[data-media=favicon]').dataset.value,
+    exit_popup: {
+      enabled: f.exit_enabled.checked,
+      delay: Number(val('exit_delay')) || 0,
+      tag: val('exit_tag'), title: val('exit_title'), text: val('exit_text'),
+      offer_text: val('exit_offer_text'), button: val('exit_button'), url: val('exit_url').trim(),
+      image: $('[data-media=exit_image]').dataset.value, note: val('exit_note'),
+    },
     badge: val('badge'),
     title: val('title'),
     subtitle: val('subtitle'),
