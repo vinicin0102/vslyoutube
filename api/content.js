@@ -1,9 +1,12 @@
 import { isAuthed, sameOriginWrite, json } from '../lib/auth.js';
 import { loadContent, saveContent, deleteMedia } from '../lib/store.js';
 import { sanitize, mediaIn } from '../lib/content.js';
+import { salesDefaults } from '../lib/sales-content.js';
 
 export async function GET(request) {
   if (!isAuthed(request)) return json({ error: 'Faça login.' }, 401);
+  // Modelo original da página de vendas (botão "Restaurar o modelo original" do painel).
+  if (new URL(request.url).searchParams.get('defaults') === 'sales') return json(salesDefaults());
   return json(await loadContent());
 }
 

@@ -362,8 +362,21 @@ function syncPanes() {
 const S_CHECKS = ['enabled', 'show_testimonials'];
 const S_MEDIA = ['img1', 'img2', 'product_image', 'results_image'];
 
+async function restoreSales(ask = true) {
+  if (ask && !confirm('Preencher todos os campos da página de vendas com o modelo original? O que você mudou nesta aba será substituído (só vale depois de Salvar).')) return;
+  try {
+    fillSales(await api('/api/content?defaults=sales'));
+    dirty = true;
+    if (ask) flash($('#smsgs'), 'ok', 'Modelo original preenchido. Ajuste o que quiser e clique em Salvar alterações.');
+  } catch (ex) {
+    flash($('#smsgs'), 'err', 'Não foi possível carregar o modelo: ' + ex.message);
+  }
+}
+$('#s-restore').addEventListener('click', () => restoreSales());
+
 function fillSales(t) {
-  if (!t) return;
+  // Conteúdo sem a página de vendas (salvo antes dela existir): usa o modelo pronto.
+  if (!t || !t.headline) { restoreSales(false); return; }
   const f = $('#fs').elements;
   for (const el of f) {
     if (!el.name || !el.name.startsWith('s_') || el.name.startsWith('s_video')) continue;
@@ -418,7 +431,8 @@ async function loadEditor() {
   // O CDN pode servir a versão anterior por até 1 min depois de salvar.
   try {
     const last = JSON.parse(localStorage.getItem(LAST_SAVED) || 'null');
-    if (last && last.updatedAt > (d.updatedAt || 0)) d = last;
+    // A cópia local pode ser de antes da página de vendas existir: mantém a do servidor nesse caso.
+    if (last && last.video && last.cta && last.updatedAt > (d.updatedAt || 0)) d = { ...last, sales: last.sales || d.sales };
   } catch {}
   fill(d);
   if (storageWarning) flash($('#msgs'), 'err', storageWarning);
