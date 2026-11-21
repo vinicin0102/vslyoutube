@@ -279,9 +279,16 @@
 
       <section class="card">
         <h2>Depoimentos</h2>
-        <p class="hint">Usa as mesmas imagens e depoimentos cadastrados na aba VSL.</p>
         <label class="inline"><input type="checkbox" name="s_show_testimonials"> Mostrar depoimentos logo abaixo do vídeo</label>
         <label>Título da seção<input name="s_testimonials_title" maxlength="200"></label>
+        <div class="gallery-field">
+          <span class="media-label">Imagens de depoimentos desta página <small>(prints de WhatsApp, Instagram… selecione várias de uma vez. Ficam centralizadas na página. Sem nenhuma imagem aqui, a página usa as imagens da aba VSL)</small></span>
+          <div class="gallery" id="s-gallery"></div>
+          <input type="file" id="s-gallery-input" multiple accept="image/jpeg,image/png,image/webp,image/gif">
+          <div class="progress" id="s-gallery-progress" hidden><div></div></div>
+          <div class="media-err" id="s-gallery-err"></div>
+        </div>
+        <p class="hint" style="margin-top:12px">Os depoimentos escritos (nome, texto, estrelas) são os da aba VSL.</p>
       </section>
 
       <section class="card">
@@ -383,7 +390,7 @@
   </div>
 </template>
 
-<script type="module" src="/admin.js?v=3"></script>
+<script type="module" src="/admin.js?v=4"></script>
 <script type="module" src="/metrics.js?v=2"></script>
 </body>
 </html>
