@@ -105,7 +105,7 @@ function setupMedia(el, url) {
       thumb.alt = '';
     }
     thumb.src = v;
-    thumb.className = 'thumb' + ('round' in el.dataset ? ' round' : '') + (el.dataset.media === 'logo' ? ' logo' : '');
+    thumb.className = 'thumb' + ('round' in el.dataset ? ' round' : '') + (/(^|_)logo$/.test(el.dataset.media) ? ' logo' : '');
     const rm = document.createElement('button');
     rm.type = 'button';
     rm.className = 'small danger';
@@ -363,7 +363,7 @@ function syncPanes() {
 /* ---------- página de vendas ---------- */
 
 const S_CHECKS = ['enabled', 'show_testimonials'];
-const S_MEDIA = ['img1', 'img2', 'product_image', 'results_image'];
+const S_MEDIA = ['logo', 'favicon', 'img1', 'img2', 'product_image', 'results_image'];
 
 async function restoreSales(ask = true) {
   if (ask && !confirm('Preencher todos os campos da página de vendas com o modelo original? O que você mudou nesta aba será substituído (só vale depois de Salvar).')) return;

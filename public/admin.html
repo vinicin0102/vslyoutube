@@ -226,6 +226,18 @@
       </section>
 
       <section class="card">
+        <h2>Marca desta página</h2>
+        <p class="hint">Logo do topo e ícone da aba do navegador da página de vendas. Deixe vazio para usar os mesmos da aba VSL.</p>
+        <label>Nome da marca <small>(aparece quando não há logo)</small><input name="s_brand_name" maxlength="80"></label>
+        <div class="media" data-media="s_logo" data-kind="image">
+          <span class="media-label">Logo <small>(PNG com fundo transparente fica melhor no fundo verde)</small></span>
+        </div>
+        <div class="media" data-media="s_favicon" data-kind="icon">
+          <span class="media-label">Ícone da aba do navegador (favicon) <small>(imagem quadrada, de preferência PNG 512×512 ou .ico)</small></span>
+        </div>
+      </section>
+
+      <section class="card">
         <h2>Topo</h2>
         <label>Frase acima do título<input name="s_tag" maxlength="200"></label>
         <label>Título <small>(o trecho entre == == fica laranja e sublinhado)</small><textarea name="s_headline" rows="3" maxlength="400"></textarea></label>
@@ -390,7 +402,7 @@
   </div>
 </template>
 
-<script type="module" src="/admin.js?v=4"></script>
+<script type="module" src="/admin.js?v=5"></script>
 <script type="module" src="/metrics.js?v=2"></script>
 </body>
 </html>
