@@ -8,13 +8,15 @@ const RANGES = { today: [0, 0], yesterday: [-1, -1], '7d': [-6, 0], '30d': [-29,
 export async function GET(request) {
   if (!isAuthed(request)) return json({ error: 'Faça login.' }, 401);
   if (!metricsConfigured()) return json({ configured: false, error: NO_REDIS_MSG });
-  const range = new URL(request.url).searchParams.get('range') || '7d';
+  const params = new URL(request.url).searchParams;
+  const range = params.get('range') || '7d';
+  const page = params.get('page') === 'oferta' ? 'oferta' : 'vsl';
   const [a, b] = RANGES[range] || RANGES['7d'];
   const t = today();
   try {
     const content = await loadContent();
-    const data = await report(content.metrics_epoch, addDays(t, a), addDays(t, b));
-    return json({ configured: true, range, pitchSec: content.cta.delay, ...data });
+    const data = await report(content.metrics_epoch, addDays(t, a), addDays(t, b), page);
+    return json({ configured: true, range, page, pitchSec: page === 'vsl' ? content.cta.delay : 0, ...data });
   } catch (err) {
     console.error('Falha ao montar métricas:', err);
     return json({ error: err.expose ? err.message : 'Não foi possível carregar as métricas.' }, 500);

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Painel da VSL</title>
+<title>Painel</title>
 <link rel="stylesheet" href="/admin.css">
 </head>
 <body>
@@ -31,7 +31,8 @@
   <header class="bar">
     <h1>Painel da VSL</h1>
     <nav class="tabs" aria-label="Seções do painel">
-      <button type="button" class="tab" data-tab="edit" aria-current="page">Página</button>
+      <button type="button" class="tab" data-tab="edit" aria-current="page">VSL</button>
+      <button type="button" class="tab" data-tab="sales">Página de vendas</button>
       <button type="button" class="tab" data-tab="metrics">Métricas</button>
     </nav>
     <div class="right">
@@ -42,6 +43,10 @@
 
   <main id="tab-metrics" hidden>
     <div class="mbar">
+      <div class="seg" role="radiogroup" aria-label="Página">
+        <label><input type="radio" name="m_page" value="vsl" checked><span>VSL</span></label>
+        <label><input type="radio" name="m_page" value="oferta"><span>Página de vendas</span></label>
+      </div>
       <div class="seg" role="radiogroup" aria-label="Período">
         <label><input type="radio" name="m_range" value="today"><span>Hoje</span></label>
         <label><input type="radio" name="m_range" value="yesterday"><span>Ontem</span></label>
@@ -203,7 +208,147 @@
         <label>Código no &lt;head&gt; <small>(UTMify, Google Tag, outros pixels)</small><textarea class="code" name="head_code" rows="5"></textarea></label>
       </section>
 
-      <div class="savebar"><button class="primary" type="submit" id="save">Salvar alterações</button></div>
+      <div class="savebar"><button class="primary savebtn" type="submit" id="save">Salvar alterações</button></div>
+    </form>
+  </main>
+
+  <main id="tab-sales" hidden>
+    <div id="smsgs" aria-live="polite"></div>
+    <form id="fs" novalidate>
+      <section class="card">
+        <h2>Página de vendas</h2>
+        <p class="hint">Fica no endereço <b>/oferta</b> do seu site: mini VSL no topo e a carta de vendas abaixo, com a oferta em forma de ficha de receita. O logo, o favicon, os depoimentos, o pop-up de saída, o rodapé e o pixel são os mesmos da aba VSL.<br>
+          <a href="/oferta" id="view-sales" target="_blank" rel="noopener">Abrir a página de vendas ↗</a></p>
+        <label class="inline"><input type="checkbox" name="s_enabled"> Página no ar <small>(desmarcado, /oferta mostra "página não encontrada")</small></label>
+        <p class="hint" style="margin-top:12px">Como escrever nos textos: <code>**negrito**</code> · <code>==destaque==</code> (marca-texto) · linha em branco = novo parágrafo · <code>- </code> no começo da linha = lista. Nos campos de lista, uma linha por item; onde houver <code>|</code>, o que vem depois é a descrição.</p>
+      </section>
+
+      <section class="card">
+        <h2>Topo</h2>
+        <label>Frase acima do título<input name="s_tag" maxlength="200"></label>
+        <label>Título <small>(o trecho entre == == fica laranja e sublinhado)</small><textarea name="s_headline" rows="3" maxlength="400"></textarea></label>
+        <label>Linha de apoio<textarea name="s_subheadline" rows="3" maxlength="600"></textarea></label>
+      </section>
+
+      <section class="card">
+        <h2>Vídeo do topo</h2>
+        <p class="hint">Já vem com a mini VSL narrada. Para trocar, envie outro arquivo, cole um link ou o código do player.</p>
+        <div class="seg" role="radiogroup" aria-label="Origem do vídeo da página de vendas">
+          <label><input type="radio" name="s_video_type" value="upload"><span>Enviar arquivo</span></label>
+          <label><input type="radio" name="s_video_type" value="url"><span>Link</span></label>
+          <label><input type="radio" name="s_video_type" value="embed"><span>Código do player</span></label>
+          <label><input type="radio" name="s_video_type" value="none"><span>Sem vídeo</span></label>
+        </div>
+        <div class="pane" data-pane="upload">
+          <div class="media" data-media="s_video_file" data-kind="video"><span class="media-label">Arquivo MP4 ou WEBM</span></div>
+        </div>
+        <div class="pane" data-pane="url">
+          <label>Link do vídeo <small>(YouTube, Vimeo ou link direto .mp4)</small><input type="url" name="s_video_url" placeholder="https://"></label>
+        </div>
+        <div class="pane" data-pane="embed">
+          <label>Código do player<textarea class="code" name="s_video_embed" rows="5"></textarea></label>
+        </div>
+        <div class="pane" data-pane="none"></div>
+        <div class="media" data-media="s_pause_image" data-kind="pause"><span class="media-label">Imagem ou vídeo ao pausar <small>(opcional)</small></span></div>
+        <label class="inline" style="margin-top:14px"><input type="checkbox" name="s_video_autoplay"> Autoplay sem som, com o aviso "toque para ouvir"</label>
+        <label>Formato
+          <select name="s_video_ratio">
+            <option value="9:16">Vertical 9:16 (celular)</option>
+            <option value="4:5">Vertical 4:5</option>
+            <option value="1:1">Quadrado 1:1</option>
+            <option value="16:9">Horizontal 16:9</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="card">
+        <h2>Botão e preço</h2>
+        <p class="hint">Deixe o preço e o link vazios para usar os mesmos da aba VSL.</p>
+        <label>Preço <small>(formato de 289 por 27,90: o antigo aparece riscado em vermelho e o novo em verde)</small><input name="s_offer_text" maxlength="300" placeholder="Vazio = o mesmo da VSL"></label>
+        <div class="grid2">
+          <label>Texto do botão<input name="s_cta_text" maxlength="80"></label>
+          <label>Link do checkout<input type="url" name="s_cta_url" placeholder="Vazio = o mesmo da VSL"></label>
+        </div>
+        <div class="grid2">
+          <label>Cor do botão<input type="color" name="s_cta_color"></label>
+          <label>Linha abaixo do botão<input name="s_pay_note" maxlength="200"></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Depoimentos</h2>
+        <p class="hint">Usa as mesmas imagens e depoimentos cadastrados na aba VSL.</p>
+        <label class="inline"><input type="checkbox" name="s_show_testimonials"> Mostrar depoimentos logo abaixo do vídeo</label>
+        <label>Título da seção<input name="s_testimonials_title" maxlength="200"></label>
+      </section>
+
+      <section class="card">
+        <h2>Carta (a dor)</h2>
+        <label>Abertura<textarea name="s_intro" rows="8" maxlength="6000"></textarea></label>
+        <div class="media" data-media="s_img1" data-kind="image"><span class="media-label">Foto entre os parágrafos <small>(quadrada fica melhor)</small></span></div>
+        <label>Legenda da foto <small>(aparece com letra de mão)</small><input name="s_img1_caption" maxlength="200"></label>
+        <label>Continuação<textarea name="s_story" rows="9" maxlength="6000"></textarea></label>
+      </section>
+
+      <section class="card">
+        <h2>Por que acontece</h2>
+        <label>Título<input name="s_mechanism_title" maxlength="200"></label>
+        <label>Texto<textarea name="s_mechanism" rows="8" maxlength="6000"></textarea></label>
+        <div class="media" data-media="s_img2" data-kind="image"><span class="media-label">Foto</span></div>
+        <label>Legenda da foto<input name="s_img2_caption" maxlength="200"></label>
+      </section>
+
+      <section class="card">
+        <h2>Produto</h2>
+        <label>Título<input name="s_product_title" maxlength="200"></label>
+        <label>Texto<textarea name="s_product_text" rows="3" maxlength="3000"></textarea></label>
+        <div class="media" data-media="s_product_image" data-kind="image"><span class="media-label">Imagem do produto <small>(PNG com fundo transparente fica melhor)</small></span></div>
+      </section>
+
+      <section class="card">
+        <h2>Resultados</h2>
+        <label>Título<input name="s_results_title" maxlength="200"></label>
+        <label>Itens <small>(um por linha)</small><textarea name="s_results" rows="5" maxlength="3000"></textarea></label>
+        <div class="media" data-media="s_results_image" data-kind="image"><span class="media-label">Foto</span></div>
+      </section>
+
+      <section class="card">
+        <h2>Ficha da oferta</h2>
+        <label>Nome do produto na ficha<input name="s_card_title" maxlength="200"></label>
+        <label>O que a pessoa recebe <small>(um por linha)</small><textarea name="s_includes" rows="6" maxlength="3000"></textarea></label>
+        <label>Título dos bônus<input name="s_bonus_title" maxlength="200"></label>
+        <label>Bônus <small>(um por linha: emoji Nome | descrição)</small><textarea name="s_bonus" rows="4" maxlength="3000"></textarea></label>
+        <div class="grid2">
+          <label>Destaque do suporte <small>(vazio esconde)</small><input name="s_support_title" maxlength="200"></label>
+          <label>Texto do suporte<input name="s_support_text" maxlength="1000"></label>
+        </div>
+        <label>Frase antes do preço<textarea name="s_offer_intro" rows="3" maxlength="2000"></textarea></label>
+      </section>
+
+      <section class="card">
+        <h2>Como você recebe</h2>
+        <label>Título<input name="s_steps_title" maxlength="200"></label>
+        <label>Passos <small>(um por linha: passo | descrição)</small><textarea name="s_steps" rows="3" maxlength="2000"></textarea></label>
+      </section>
+
+      <section class="card">
+        <h2>Garantia</h2>
+        <label>Título<input name="s_guarantee_title" maxlength="200"></label>
+        <label>Texto<textarea name="s_guarantee_text" rows="4" maxlength="2000"></textarea></label>
+      </section>
+
+      <section class="card">
+        <h2>Perguntas frequentes</h2>
+        <label>Título<input name="s_faq_title" maxlength="200"></label>
+        <label>Perguntas <small>(uma por linha: pergunta | resposta)</small><textarea name="s_faq" rows="8" maxlength="8000"></textarea></label>
+      </section>
+
+      <section class="card">
+        <h2>P.S. e botão final</h2>
+        <label>Texto<textarea name="s_ps" rows="4" maxlength="3000"></textarea></label>
+      </section>
+
+      <div class="savebar"><button class="primary savebtn" type="submit">Salvar alterações</button></div>
     </form>
   </main>
 </div>

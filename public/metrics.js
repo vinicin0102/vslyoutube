@@ -16,6 +16,7 @@ function showTab(name) {
   }
   $('#tab-edit').hidden = name !== 'edit';
   $('#tab-metrics').hidden = name !== 'metrics';
+  $('#tab-sales').hidden = name !== 'sales';
   if (name === 'metrics' && !loaded) load();
 }
 for (const b of document.querySelectorAll('.tab')) b.addEventListener('click', () => showTab(b.dataset.tab));
@@ -56,11 +57,12 @@ function msg(type, text) {
 async function load() {
   loaded = true;
   const range = (document.querySelector('input[name=m_range]:checked') || {}).value || '7d';
+  const page = (document.querySelector('input[name=m_page]:checked') || {}).value || 'vsl';
   const btn = $('#m-refresh');
   btn.disabled = true;
   btn.textContent = 'Carregando…';
   try {
-    const res = await fetch('/api/metrics?range=' + range, { credentials: 'same-origin' });
+    const res = await fetch('/api/metrics?range=' + range + '&page=' + page, { credentials: 'same-origin' });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Erro ' + res.status);
     if (data.configured === false) {
@@ -81,7 +83,7 @@ async function load() {
 }
 
 $('#m-refresh').addEventListener('click', load);
-for (const r of document.querySelectorAll('input[name=m_range]')) r.addEventListener('change', load);
+for (const r of document.querySelectorAll('input[name=m_range], input[name=m_page]')) r.addEventListener('change', load);
 
 $('#m-reset').addEventListener('click', async () => {
   if (!confirm('Zerar as métricas? A contagem começa do zero a partir de agora.')) return;
@@ -120,8 +122,10 @@ function renderKpis(d) {
     ['Visualizações da página', num(d.views), `${num(d.uniques)} visitantes únicos`],
     ['Play rate', fmtPct(pct(d.plays, d.views)), `${num(d.plays)} deram play`],
     ['Engajamento médio', fmtPct(d.avgWatch * 100), d.duration ? `do vídeo de ${mmss(d.duration)}` : 'do vídeo assistido'],
-    ['Chegaram no pitch', hasPitch ? fmtPct(pct(d.pitch, d.plays)) : '—',
-      hasPitch ? `${num(d.pitch)} pessoas · pitch em ${mmss(d.pitchSec)}` : 'Defina o momento do pitch na aba Página'],
+    d.page === 'oferta'
+      ? ['Chegaram na oferta', fmtPct(pct(d.pitch, d.views)), `${num(d.pitch)} pessoas rolaram até a ficha da oferta`]
+      : ['Chegaram no pitch', hasPitch ? fmtPct(pct(d.pitch, d.plays)) : '—',
+        hasPitch ? `${num(d.pitch)} pessoas · pitch em ${mmss(d.pitchSec)}` : 'Defina o momento do pitch na aba VSL'],
     ['Assistiram até o final', fmtPct(pct(d.finish, d.plays)), `${num(d.finish)} pessoas`],
     ['Cliques no botão', num(d.cta), `${fmtPct(pct(d.cta, d.views))} das visualizações`],
   ];

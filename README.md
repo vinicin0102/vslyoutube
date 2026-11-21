@@ -55,6 +55,24 @@ Depois de mudar uma variável, faça um **Redeploy** para ela valer.
 Alterações aparecem na página pública em até ~1 minuto (cache do CDN). O botão
 "Ver página" do painel abre uma versão sem cache logo depois de salvar.
 
+## Página de vendas (`/oferta`, aba "Página de vendas" do painel)
+
+Mini VSL no topo e carta de vendas abaixo: dor, por que acontece, produto,
+resultados, a oferta como uma **ficha de receita** (o que a pessoa recebe,
+bônus, chat 24h, preço e botão, com o carimbo da garantia), como recebe,
+garantia, perguntas frequentes e P.S. No celular, uma barra fixa com o preço e
+o botão aparece depois que o botão do topo sai da tela.
+
+- Todos os textos, fotos, vídeo, preço, botão e cor são editáveis. Preço e link
+  vazios usam os mesmos da VSL. Logo, favicon, depoimentos, pop-up de saída,
+  rodapé e pixel são os mesmos da VSL.
+- Nos textos: `**negrito**`, `==destaque==`, linha em branco = parágrafo,
+  `- ` = lista; nas listas, `nome | descrição`.
+- A mini VSL e as fotos padrão ficam em `public/media/` (vêm com o site).
+- Métricas próprias (escolha "Página de vendas" na aba Métricas): "Chegaram na
+  oferta" conta quem rolou até a ficha. Eventos do pixel: PageView, VideoPlay,
+  VideoProgress, ViewContent + Pitch (ao ver a ficha) e InitiateCheckout.
+
 ## Métricas (aba "Métricas" do painel)
 
 Precisa de um banco para gravar as visitas. Duas opções (o Supabase tem

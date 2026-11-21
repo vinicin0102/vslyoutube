@@ -131,7 +131,8 @@ function setupMedia(el, url) {
     try {
       el.dataset.value = await uploadFile(file, kind, (p) => (bar.firstChild.style.width = p + '%'));
       dirty = true;
-      if (el.dataset.media === 'video_file') { $('input[name=video_type][value=upload]').checked = true; syncPanes(); }
+      const pre = el.dataset.media.startsWith('s_') ? 's_' : '';
+      if (el.dataset.media === pre + 'video_file') { $(`input[name=${pre}video_type][value=upload]`).checked = true; syncPanes(); }
       paint();
     } catch (ex) {
       err.textContent = 'Falha no envio: ' + ex.message;
@@ -145,9 +146,10 @@ function setupMedia(el, url) {
 }
 
 function syncSave() {
-  const b = $('#save');
-  b.disabled = pending > 0;
-  b.textContent = pending > 0 ? 'Aguardando envio…' : 'Salvar alterações';
+  for (const b of $$('.savebtn')) {
+    b.disabled = pending > 0;
+    b.textContent = pending > 0 ? 'Aguardando envio…' : 'Salvar alterações';
+  }
 }
 
 /* ---------- depoimentos ---------- */
@@ -289,6 +291,7 @@ function fill(d) {
   $('#tlist').replaceChildren();
   d.testimonials.forEach(addRow);
   syncEmpty();
+  fillSales(d.sales);
   syncPanes();
   dirty = false;
 }
@@ -343,18 +346,69 @@ function collect() {
     disclaimer: val('disclaimer'),
     head_code: val('head_code'),
     meta_pixel_id: val('meta_pixel_id').trim(),
+    sales: collectSales(),
   };
 }
 
 function syncPanes() {
-  const v = ($('input[name=video_type]:checked') || {}).value || 'url';
-  for (const p of $$('.pane')) p.hidden = p.dataset.pane !== v;
+  for (const [form, name, def] of [['#f', 'video_type', 'url'], ['#fs', 's_video_type', 'upload']]) {
+    const v = ($(`input[name=${name}]:checked`) || {}).value || def;
+    for (const p of $$('.pane', $(form))) p.hidden = p.dataset.pane !== v;
+  }
+}
+
+/* ---------- página de vendas ---------- */
+
+const S_CHECKS = ['enabled', 'show_testimonials'];
+const S_MEDIA = ['img1', 'img2', 'product_image', 'results_image'];
+
+function fillSales(t) {
+  if (!t) return;
+  const f = $('#fs').elements;
+  for (const el of f) {
+    if (!el.name || !el.name.startsWith('s_') || el.name.startsWith('s_video')) continue;
+    const k = el.name.slice(2);
+    if (S_CHECKS.includes(k)) el.checked = Boolean(t[k]);
+    else if (k in t) el.value = t[k] ?? '';
+  }
+  const v = t.video || {};
+  ($(`input[name=s_video_type][value="${v.type}"]`) || $('input[name=s_video_type][value=upload]')).checked = true;
+  f.s_video_url.value = v.url || '';
+  f.s_video_embed.value = v.embed || '';
+  f.s_video_ratio.value = v.ratio || '9:16';
+  f.s_video_autoplay.checked = v.autoplay !== false;
+  setupMedia($('[data-media=s_video_file]'), v.file);
+  setupMedia($('[data-media=s_pause_image]'), v.pause_image);
+  for (const k of S_MEDIA) setupMedia($(`[data-media=s_${k}]`), t[k]);
+}
+
+function collectSales() {
+  const f = $('#fs').elements;
+  const out = {};
+  for (const el of f) {
+    if (!el.name || !el.name.startsWith('s_') || el.name.startsWith('s_video')) continue;
+    const k = el.name.slice(2);
+    out[k] = S_CHECKS.includes(k) ? el.checked : el.value;
+  }
+  out.cta_url = (out.cta_url || '').trim();
+  for (const k of S_MEDIA) out[k] = $(`[data-media=s_${k}]`).dataset.value;
+  out.video = {
+    type: ($('input[name=s_video_type]:checked') || {}).value || 'upload',
+    file: $('[data-media=s_video_file]').dataset.value,
+    url: f.s_video_url.value.trim(),
+    embed: f.s_video_embed.value,
+    ratio: f.s_video_ratio.value,
+    autoplay: f.s_video_autoplay.checked,
+    pause_image: $('[data-media=s_pause_image]').dataset.value,
+  };
+  return out;
 }
 
 function warnings(d) {
   const out = [];
   if ($('#f').elements.cta_url.value.trim() && !/^https?:\/\//i.test(d.cta.url)) out.push('o link do botão precisa começar com https://');
   if (d.video.type === 'url' && d.video.url && !/^https?:\/\//i.test(d.video.url)) out.push('o link do vídeo precisa começar com https://');
+  if ($('#fs').elements.s_cta_url.value.trim() && !/^https?:\/\//i.test(d.sales.cta_url)) out.push('o link do botão da página de vendas precisa começar com https://');
   return out;
 }
 
@@ -417,41 +471,48 @@ $('#tlist').addEventListener('input', (ev) => {
   if (ev.target.matches('[data-f=name]')) $('.trow-title', ev.target.closest('.trow')).textContent = ev.target.value || 'Novo depoimento';
 });
 
-$('#f').addEventListener('change', (ev) => {
-  if (ev.target.name === 'video_type') syncPanes();
-  dirty = true;
-});
-$('#f').addEventListener('input', () => (dirty = true));
+for (const form of ['#f', '#fs']) {
+  $(form).addEventListener('change', (ev) => {
+    if (/video_type$/.test(ev.target.name)) syncPanes();
+    dirty = true;
+  });
+  $(form).addEventListener('input', () => (dirty = true));
+}
 
-$('#f').addEventListener('submit', async (ev) => {
-  ev.preventDefault();
+// As duas abas (VSL e página de vendas) salvam tudo junto, no mesmo arquivo.
+$('#f').addEventListener('submit', (ev) => { ev.preventDefault(); save($('#msgs')); });
+$('#fs').addEventListener('submit', (ev) => { ev.preventDefault(); save($('#smsgs')); });
+
+async function save(box) {
   if (pending > 0) return;
   const pitchOk = parseTime($('#f').elements.cta_pitch.value) !== null;
   $('#pitch-err').hidden = pitchOk;
-  if (!pitchOk) return $('#f').elements.cta_pitch.focus();
+  if (!pitchOk) {
+    document.querySelector('.tab[data-tab=edit]').click();
+    return $('#f').elements.cta_pitch.focus();
+  }
   const data = collect();
-  const btn = $('#save');
-  btn.disabled = true;
-  btn.textContent = 'Salvando…';
+  for (const b of $$('.savebtn')) { b.disabled = true; b.textContent = 'Salvando…'; }
   try {
     const saved = await api('/api/content', { method: 'PUT', headers: HDR, body: JSON.stringify(data) });
     try { localStorage.setItem(LAST_SAVED, JSON.stringify(saved)); } catch {}
     fill(saved);
     $('#view-page').href = '/?v=' + saved.updatedAt; // fura o cache do CDN
-    const w = warnings(data);
-    flash($('#msgs'), w.length ? 'err' : 'ok',
+    $('#view-sales').href = '/oferta?v=' + saved.updatedAt;
+    const w = warnings(saved);
+    flash(box, w.length ? 'err' : 'ok',
       w.length ? 'Salvo, mas ' + w.join(' e ') + '.' : 'Alterações salvas. A página pública atualiza em até 1 minuto.');
   } catch (ex) {
     if (ex.status === 401) {
       flash($('#login-msg'), 'err', ex.message);
       show('view-login');
     } else {
-      flash($('#msgs'), 'err', ex.message);
+      flash(box, 'err', ex.message);
     }
   } finally {
     syncSave();
   }
-});
+}
 
 window.addEventListener('beforeunload', (e) => {
   if (dirty || pending) { e.preventDefault(); e.returnValue = ''; }
