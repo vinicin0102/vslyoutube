@@ -511,8 +511,9 @@ async function save(box) {
     const saved = await api('/api/content', { method: 'PUT', headers: HDR, body: JSON.stringify(data) });
     try { localStorage.setItem(LAST_SAVED, JSON.stringify(saved)); } catch {}
     fill(saved);
-    $('#view-page').href = '/?v=' + saved.updatedAt; // fura o cache do CDN
-    $('#view-sales').href = '/oferta?v=' + saved.updatedAt;
+    viewStamp = '?v=' + saved.updatedAt; // fura o cache do CDN
+    $('#view-sales').href = '/oferta' + viewStamp;
+    syncViewLink();
     const w = warnings(saved);
     flash(box, w.length ? 'err' : 'ok',
       w.length ? 'Salvo, mas ' + w.join(' e ') + '.' : 'Alterações salvas. A página pública atualiza em até 1 minuto.');
@@ -527,6 +528,16 @@ async function save(box) {
     syncSave();
   }
 }
+
+// "Ver página" do topo abre a página da aba aberta: VSL ou página de vendas.
+let viewStamp = '';
+function syncViewLink() {
+  const sales = !$('#tab-sales').hidden;
+  const a = $('#view-page');
+  a.href = (sales ? '/oferta' : '/') + viewStamp;
+  a.textContent = sales ? 'Ver página de vendas ↗' : 'Ver VSL ↗';
+}
+for (const b of $$('.tab')) b.addEventListener('click', () => setTimeout(syncViewLink));
 
 window.addEventListener('beforeunload', (e) => {
   if (dirty || pending) { e.preventDefault(); e.returnValue = ''; }
