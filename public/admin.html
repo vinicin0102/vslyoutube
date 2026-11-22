@@ -33,6 +33,7 @@
     <nav class="tabs" aria-label="Seções do painel">
       <button type="button" class="tab" data-tab="edit" aria-current="page">VSL</button>
       <button type="button" class="tab" data-tab="sales">Página de vendas</button>
+      <button type="button" class="tab" data-tab="area">Área de membros</button>
       <button type="button" class="tab" data-tab="metrics">Métricas</button>
     </nav>
     <div class="right">
@@ -210,6 +211,56 @@
 
       <div class="savebar"><button class="primary savebtn" type="submit" id="save">Salvar alterações</button></div>
     </form>
+  </main>
+
+  <main id="tab-area" hidden>
+    <div id="amsgs" aria-live="polite"></div>
+
+    <section class="card">
+      <h2>Acesso dos alunos</h2>
+      <p class="hint">Os alunos entram em <b id="a-link-text">/membros</b> com o e-mail da compra e criam a senha no primeiro acesso.</p>
+      <div class="copyrow"><input id="a-link" readonly aria-label="Link da área de membros"><button type="button" data-copy="a-link">Copiar</button><a class="btn" id="a-open" href="/membros" target="_blank" rel="noopener">Abrir ↗</a></div>
+      <h3 class="sub">Liberação automática pela plataforma de vendas</h3>
+      <p class="hint">Cole este link no <b>webhook</b> da sua plataforma (Kiwify, Hotmart, Cakto, Eduzz, Perfect Pay, Ticto…). Compra aprovada libera o acesso na hora; reembolso ou chargeback bloqueia. Na plataforma, coloque também o link da área de membros como "link de acesso" do produto, para o comprador receber no e-mail.</p>
+      <div class="copyrow"><input id="a-hook" readonly aria-label="Link do webhook"><button type="button" data-copy="a-hook">Copiar</button></div>
+      <button type="button" class="small" id="a-hook-new" style="margin-top:8px">Gerar link novo</button> <small class="hint">(use se o link vazar; depois atualize na plataforma)</small>
+    </section>
+
+    <section class="card">
+      <h2>Módulos e aulas</h2>
+      <p class="hint">Organize o curso em módulos (os bônus aparecem numa seção separada). Em cada aula: envie o vídeo, cole um link (YouTube, Vimeo, .mp4) ou o código do player (Panda, VTurb). Texto e materiais (PDF, links) são opcionais.</p>
+      <div id="c-box"></div>
+      <button type="button" class="add" id="c-addmod">+ Adicionar módulo</button>
+      <div class="savebar"><button class="primary" type="button" id="c-save">Salvar aulas</button></div>
+    </section>
+
+    <section class="card">
+      <h2>Alunos <small class="hint" id="m-count"></small></h2>
+      <p class="hint">Quem compra entra sozinho pelo webhook. Para liberar à mão, cole os e-mails abaixo (um por linha; pode pôr o nome depois de uma vírgula).</p>
+      <label>Liberar acesso<textarea id="m-add" rows="3" placeholder="maria@gmail.com, Maria Souza&#10;joao@hotmail.com"></textarea></label>
+      <button type="button" id="m-add-btn">Liberar acesso</button>
+      <div class="mbar" style="margin-top:16px"><input id="m-q" type="search" placeholder="Buscar por e-mail ou nome" aria-label="Buscar aluno" style="flex:1"><button type="button" id="m-reload">Atualizar</button></div>
+      <div class="tscroll"><table id="m-table"></table></div>
+    </section>
+
+    <section class="card">
+      <h2>Chat do auxiliar veterinário</h2>
+      <p class="hint">O chat usa a IA da Anthropic (Claude). Crie a chave em <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com → API keys</a> (é preciso cadastrar um cartão em Billing) e cole aqui. A chave fica guardada no servidor e não aparece de novo.</p>
+      <label>Chave da API da Anthropic <small id="s-keyinfo"></small><input id="s-key" type="password" autocomplete="off" placeholder="sk-ant-..." spellcheck="false"></label>
+      <div class="grid2">
+        <label>Modelo<select id="s-model"></select></label>
+        <label>Limite de mensagens por aluno por dia<input id="s-limit" type="number" min="1" max="500"></label>
+      </div>
+      <p class="hint">Custo aproximado por mensagem: Opus 5.5 ≈ R$ 0,07 · Sonnet 5.5 ≈ R$ 0,04 · Haiku 5.5 ≈ R$ 0,003. O limite diário protege contra gastos fora do normal.</p>
+      <label>Nome do assistente<input id="s-name" maxlength="60"></label>
+      <label>Instruções extras <small>(opcional: informações do seu produto que o auxiliar deve saber, como receitas e porções do guia)</small><textarea id="s-instr" rows="4" maxlength="4000"></textarea></label>
+      <label>Contato de suporte para os alunos <small>(aparece na área de membros; ex.: WhatsApp (11) 99999-9999 ou e-mail)</small><input id="s-support" maxlength="300"></label>
+      <div class="savebar" style="position:static;background:none;border:0;padding:12px 0 0;justify-content:flex-start;gap:8px">
+        <button class="primary" type="button" id="s-save">Salvar chat</button>
+        <button type="button" id="s-test">Testar chave</button>
+        <button type="button" class="small danger" id="s-delkey">Apagar chave</button>
+      </div>
+    </section>
   </main>
 
   <main id="tab-sales" hidden>
@@ -402,7 +453,8 @@
   </div>
 </template>
 
-<script type="module" src="/admin.js?v=6"></script>
-<script type="module" src="/metrics.js?v=2"></script>
+<script type="module" src="/admin.js?v=8"></script>
+<script type="module" src="/metrics.js?v=3"></script>
+<script type="module" src="/area-admin.js?v=1"></script>
 </body>
 </html>

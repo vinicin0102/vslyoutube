@@ -110,3 +110,18 @@ th:first-child, td:first-child { text-align: left; }
 th { color: var(--muted); font-weight: 500; }
 .cards2 { gap: 0 16px; }
 .cards2 .card { margin-bottom: 16px; }
+
+/* Área de membros */
+.copyrow { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.copyrow input { flex: 1; min-width: 0; }
+h3.sub { margin: 20px 0 4px; font-size: 15px; }
+.cmod, .cles { border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; margin-top: 12px; background: rgba(255,255,255,.02); }
+.cles { margin-left: 4px; background: rgba(255,255,255,.03); }
+.cmod > summary, .cles > summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 0; cursor: pointer; list-style: none; }
+.cmod > summary::-webkit-details-marker, .cles > summary::-webkit-details-marker { display: none; }
+.cmod > summary::before, .cles > summary::before { content: "▸"; color: var(--muted); }
+.cmod[open] > summary::before, .cles[open] > summary::before { content: "▾"; }
+.cmod > summary .trow-actions, .cles > summary .trow-actions { margin-left: auto; }
+.cmod[open], .cles[open] { padding-bottom: 14px; }
+.cmedia { margin-top: 12px; }
+.cmedia .thumb { max-height: 110px; }

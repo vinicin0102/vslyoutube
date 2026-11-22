@@ -63,6 +63,9 @@ async function uploadFile(file, kind, onProgress) {
   return blob.url;
 }
 
+// A aba "Área de membros" (area-admin.js) usa o mesmo envio de arquivos.
+window.vslUpload = (file, kind, onProgress) => uploadFile(file, kind, onProgress);
+
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const VIDEO_TYPES = ['video/mp4', 'video/webm'];
 // Tipos aceitos por campo: "pause" aceita imagem ou vídeo curto.
@@ -537,10 +540,10 @@ async function save(box) {
 // "Ver página" do topo abre a página da aba aberta: VSL ou página de vendas.
 let viewStamp = '';
 function syncViewLink() {
-  const sales = !$('#tab-sales').hidden;
+  const sales = !$('#tab-sales').hidden, area = !$('#tab-area').hidden;
   const a = $('#view-page');
-  a.href = (sales ? '/oferta' : '/') + viewStamp;
-  a.textContent = sales ? 'Ver página de vendas ↗' : 'Ver VSL ↗';
+  a.href = area ? '/membros' : (sales ? '/oferta' : '/') + viewStamp;
+  a.textContent = area ? 'Ver área de membros ↗' : sales ? 'Ver página de vendas ↗' : 'Ver VSL ↗';
 }
 for (const b of $$('.tab')) b.addEventListener('click', () => setTimeout(syncViewLink));
 

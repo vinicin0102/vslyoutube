@@ -136,3 +136,19 @@ npm run dev
 
 Abre em `http://127.0.0.1:3000` (painel em `/admin`, senha `teste123`) usando a
 pasta `.dev-data/` no lugar do Blob.
+
+## Área de membros (`/membros`, aba "Área de membros" do painel)
+
+App do aluno: login com o e-mail da compra (a senha é criada no primeiro acesso),
+módulos e aulas com progresso, bônus, materiais em PDF e o chat 24h com o
+auxiliar veterinário virtual (IA da Anthropic, Claude).
+
+- **Aulas:** no painel, módulos e aulas com vídeo enviado, link (YouTube, Vimeo,
+  .mp4) ou código do player (Panda, VTurb), texto e materiais.
+- **Alunos:** liberação automática pelo webhook da plataforma de vendas (compra
+  aprovada libera; reembolso/chargeback bloqueia) ou à mão no painel; bloquear,
+  zerar senha e excluir.
+- **Chat:** cole a chave da API da Anthropic no painel (fica no banco, nunca volta
+  para o navegador), escolha o modelo e o limite diário de mensagens por aluno.
+- **Banco:** Supabase (tabelas `app_members`, `app_kv`, `app_chat_usage`, criadas
+  sozinhas; SQL em `sql/area-membros.sql`).

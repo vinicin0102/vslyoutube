@@ -12,6 +12,10 @@
     {
       "source": "/oferta",
       "destination": "/api/oferta"
+    },
+    {
+      "source": "/membros",
+      "destination": "/membros.html"
     }
   ],
   "headers": [
@@ -53,6 +57,23 @@
           "value": "public, max-age=604800, stale-while-revalidate=86400"
         }
       ]
+    },
+    {
+      "source": "/membros(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        }
+      ]
     }
   ],
   "images": {
@@ -82,5 +103,10 @@
         "pathname": "^/vsl/uploads/.*$"
       }
     ]
+  },
+  "functions": {
+    "api/membros.js": {
+      "maxDuration": 60
+    }
   }
 }

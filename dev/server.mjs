@@ -20,6 +20,7 @@ http.createServer(async (req, res) => {
   if (p === '/') p = '/api/page';
   if (p === '/admin') p = '/admin.html';
   if (p === '/oferta') p = '/api/oferta';
+  if (p === '/membros') p = '/membros.html';
   const chunks = [];
   for await (const c of req) chunks.push(c);
   const body = Buffer.concat(chunks);
