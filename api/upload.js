@@ -16,6 +16,8 @@ const KINDS = {
   icon: { types: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/x-icon', 'image/vnd.microsoft.icon'], max: 2 * 1024 * 1024 },
   // Imagem ou vídeo curto que cobre o player quando a pessoa pausa.
   pause: { types: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'], max: 100 * 1024 * 1024 },
+  // Campos de conteúdo: imagem ou vídeo, à escolha.
+  media: { types: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'], max: 1024 * 1024 * 1024 },
 };
 
 function rules(pathname, clientPayload) {

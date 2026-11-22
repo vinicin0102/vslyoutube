@@ -67,8 +67,8 @@ const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const VIDEO_TYPES = ['video/mp4', 'video/webm'];
 // Tipos aceitos por campo: "pause" aceita imagem ou vídeo curto.
 const ICON_TYPES = [...IMAGE_TYPES, 'image/x-icon', 'image/vnd.microsoft.icon'];
-const ACCEPT = { image: IMAGE_TYPES, video: VIDEO_TYPES, pause: [...IMAGE_TYPES, ...VIDEO_TYPES], icon: ICON_TYPES };
-const ACCEPT_LABEL = { image: 'JPG, PNG, WEBP ou GIF', video: 'MP4 ou WEBM', pause: 'JPG, PNG, WEBP, GIF, MP4 ou WEBM', icon: 'PNG, ICO, JPG, WEBP ou GIF' };
+const ACCEPT = { image: IMAGE_TYPES, video: VIDEO_TYPES, pause: [...IMAGE_TYPES, ...VIDEO_TYPES], media: [...IMAGE_TYPES, ...VIDEO_TYPES], icon: ICON_TYPES };
+const ACCEPT_LABEL = { image: 'JPG, PNG, WEBP ou GIF', video: 'MP4 ou WEBM', pause: 'JPG, PNG, WEBP, GIF, MP4 ou WEBM', media: 'JPG, PNG, WEBP, GIF, MP4 ou WEBM', icon: 'PNG, ICO, JPG, WEBP ou GIF' };
 const isVideoUrl = (u) => /\.(mp4|webm)(\?|$)/i.test(u || '');
 
 /** Campo de mídia: miniatura do arquivo atual, botão remover e seletor de arquivo. */
@@ -96,7 +96,7 @@ function setupMedia(el, url) {
     current.hidden = !v;
     if (!v) return;
     let thumb;
-    if (kind === 'video' || (kind === 'pause' && isVideoUrl(v))) {
+    if (kind === 'video' || ((kind === 'pause' || kind === 'media') && isVideoUrl(v))) {
       thumb = document.createElement('video');
       thumb.muted = true;
       thumb.preload = 'metadata';
@@ -180,10 +180,9 @@ function makeGallery(p) {
     box.replaceChildren(...g.items.map((url, i) => {
       const item = document.createElement('div');
       item.className = 'gitem';
-      const img = document.createElement('img');
+      const img = document.createElement(isVideoUrl(url) ? 'video' : 'img');
       img.src = url;
-      img.alt = `Depoimento ${i + 1}`;
-      img.loading = 'lazy';
+      if (isVideoUrl(url)) { img.muted = true; img.preload = 'metadata'; } else { img.alt = `Depoimento ${i + 1}`; img.loading = 'lazy'; }
       const bar = document.createElement('div');
       bar.className = 'gbar';
       const btn = (label, aria, fn, cls = '') => {
@@ -224,7 +223,8 @@ function makeGallery(p) {
     syncSave();
     for (const [n, file] of files.entries()) {
       try {
-        const url = await uploadFile(file, 'image', (pc) => {
+        if (![...IMAGE_TYPES, ...VIDEO_TYPES].includes(file.type)) throw new Error('formato não aceito (envie JPG, PNG, WEBP, GIF, MP4 ou WEBM)');
+        const url = await uploadFile(file, 'media', (pc) => {
           bar.firstChild.style.width = ((n + pc / 100) / files.length) * 100 + '%';
         });
         g.items.push(url);
