@@ -252,13 +252,16 @@
 
     <section class="card">
       <h2>Chat do auxiliar veterinário</h2>
-      <p class="hint">O chat usa a IA da Anthropic (Claude). Crie a chave em <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com → API keys</a> (é preciso cadastrar um cartão em Billing) e cole aqui. A chave fica guardada no servidor e não aparece de novo.</p>
-      <label>Chave da API da Anthropic <small id="s-keyinfo"></small><input id="s-key" type="password" autocomplete="off" placeholder="sk-ant-..." spellcheck="false"></label>
+      <p class="hint" id="s-provhint"></p>
       <div class="grid2">
+        <label>Provedor da IA<select id="s-provider"></select></label>
         <label>Modelo<select id="s-model"></select></label>
+      </div>
+      <label><span id="s-keylabel">Chave da API</span> <small id="s-keyinfo"></small><input id="s-key" type="password" autocomplete="off" placeholder="sk-..." spellcheck="false"></label>
+      <div class="grid2">
         <label>Limite de mensagens por aluno por dia<input id="s-limit" type="number" min="1" max="500"></label>
       </div>
-      <p class="hint">Custo aproximado por mensagem: Opus 5.5 ≈ R$ 0,07 · Sonnet 5.5 ≈ R$ 0,04 · Haiku 5.5 ≈ R$ 0,003. O limite diário protege contra gastos fora do normal.</p>
+      <p class="hint">Custo aproximado por mensagem: DeepSeek V3 ≈ R$ 0,005 · Claude Opus 5.5 ≈ R$ 0,07 · Sonnet 5.5 ≈ R$ 0,04 · Haiku 5.5 ≈ R$ 0,003. O limite diário protege contra gastos fora do normal.</p>
       <label>Nome do assistente<input id="s-name" maxlength="60"></label>
       <label>Instruções extras <small>(opcional: informações do seu produto que o auxiliar deve saber, como receitas e porções do guia)</small><textarea id="s-instr" rows="4" maxlength="4000"></textarea></label>
       <label>Contato de suporte para os alunos <small>(aparece na área de membros; ex.: WhatsApp (11) 99999-9999 ou e-mail)</small><input id="s-support" maxlength="300"></label>
@@ -462,6 +465,6 @@
 
 <script type="module" src="/admin.js?v=8"></script>
 <script type="module" src="/metrics.js?v=3"></script>
-<script type="module" src="/area-admin.js?v=2"></script>
+<script type="module" src="/area-admin.js?v=3"></script>
 </body>
 </html>

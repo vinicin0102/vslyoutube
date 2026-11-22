@@ -203,7 +203,8 @@ function fillSettings(s) {
   settings = s;
   $('#s-key').value = '';
   $('#s-keyinfo').textContent = s.ai_key_set ? `(configurada, termina em ${s.ai_key_hint}; deixe vazio para manter)` : '(ainda não configurada)';
-  $('#s-model').innerHTML = Object.entries(s.models).map(([k, v]) => `<option value="${k}" ${k === s.ai_model ? 'selected' : ''}>${esc(v)}</option>`).join('');
+  $('#s-provider').innerHTML = Object.entries(s.providers).map(([k, v]) => `<option value="${k}" ${k === s.ai_provider ? 'selected' : ''}>${esc(v.label)}</option>`).join('');
+  fillModels(s.ai_model);
   $('#s-limit').value = s.chat_limit;
   $('#s-name').value = s.assistant_name;
   $('#s-instr').value = s.instructions;
@@ -230,13 +231,31 @@ $('#s-appsave').addEventListener('click', async () => {
   try { await saveSettings({ app_name: $('#s-appname').value, app_icon: appIcon }); flash('ok', 'App salvo. Quem instalar daqui pra frente já recebe o nome e o ícone novos.'); }
   catch (ex) { flash('err', ex.message); }
 });
+const PROV_HINT = {
+  deepseek: 'O chat usa a IA da DeepSeek. Crie a chave em <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com → API keys</a> (coloque saldo em Top up) e cole aqui. A chave fica guardada no servidor e não aparece de novo.',
+  anthropic: 'O chat usa a IA da Anthropic (Claude). Crie a chave em <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com → API keys</a> (cadastre um cartão em Billing) e cole aqui. A chave fica guardada no servidor e não aparece de novo.',
+};
+function fillModels(selected) {
+  const prov = $('#s-provider').value, models = settings.providers[prov].models;
+  $('#s-model').innerHTML = Object.entries(models).map(([k, v]) => `<option value="${k}" ${k === selected ? 'selected' : ''}>${esc(v)}</option>`).join('');
+  $('#s-provhint').innerHTML = PROV_HINT[prov] || '';
+  $('#s-keylabel').textContent = 'Chave da API da ' + settings.providers[prov].label.replace(/ \(.*\)/, '');
+  $('#s-key').placeholder = prov === 'anthropic' ? 'sk-ant-...' : 'sk-...';
+}
+$('#s-provider').addEventListener('change', () => {
+  fillModels();
+  if (settings.ai_key_set && $('#s-provider').value !== settings.ai_provider) $('#s-keyinfo').textContent = '(cole a chave do novo provedor)';
+});
 async function saveSettings(extra = {}) {
-  const body = { ai_key: $('#s-key').value.trim(), ai_model: $('#s-model').value, chat_limit: Number($('#s-limit').value), assistant_name: $('#s-name').value, instructions: $('#s-instr').value, support: $('#s-support').value, ...extra };
+  const body = { ai_key: $('#s-key').value.trim(), ai_provider: $('#s-provider').value, ai_model: $('#s-model').value, chat_limit: Number($('#s-limit').value), assistant_name: $('#s-name').value, instructions: $('#s-instr').value, support: $('#s-support').value, ...extra };
   fillSettings(await api('settings', { method: 'PUT', body: JSON.stringify(body) }));
 }
 $('#s-save').addEventListener('click', async () => {
   const k = $('#s-key').value.trim();
-  if (k && !/^sk-ant-/.test(k) && !confirm('A chave da Anthropic normalmente começa com "sk-ant-". Salvar mesmo assim?')) return;
+  const prov = $('#s-provider').value;
+  if (k && prov === 'anthropic' && !/^sk-ant-/.test(k) && !confirm('A chave da Anthropic normalmente começa com "sk-ant-". Salvar mesmo assim?')) return;
+  if (k && prov === 'deepseek' && (!/^sk-/.test(k) || /^sk-ant-/.test(k)) && !confirm('A chave da DeepSeek normalmente começa com "sk-". Salvar mesmo assim?')) return;
+  if (!k && settings.ai_key_set && prov !== settings.ai_provider && !confirm('Você trocou o provedor sem colar uma chave nova. A chave atual é do outro provedor e não vai funcionar. Salvar mesmo assim?')) return;
   try { await saveSettings(); flash('ok', 'Chat salvo.'); } catch (ex) { flash('err', ex.message); }
 });
 $('#s-delkey').addEventListener('click', async () => {
