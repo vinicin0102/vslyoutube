@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#121110">
+<link rel="manifest" href="/membros.webmanifest">
+<link rel="icon" href="/media/app-any-192.png">
+<link rel="apple-touch-icon" id="apple-icon" href="/media/app-apple-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bifinhos">
 <title>Área de membros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +21,9 @@
     --accent: #f59e0b; --accent2: #e8590c; --green: #22c55e; --red: #ef4444;
     --head: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; --body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.5 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.5 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+  /* app instalado: respeita o entalhe/relógio do celular */
+  @media (display-mode: standalone) { .top { padding-top: calc(14px + env(safe-area-inset-top)); } .login { padding-top: calc(24px + env(safe-area-inset-top)); } }
   button, input, textarea { font: inherit; color: inherit; }
   a { color: var(--accent); }
   img, video { max-width: 100%; display: block; }
@@ -126,6 +135,20 @@
   .acc { padding: 16px; margin-top: 14px; }
   .acc div { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
   .acc div:last-child { border-bottom: 0; }
+  /* instalar o app */
+  .install { display: flex; gap: 12px; align-items: center; margin-top: 14px; padding: 14px; border-color: rgba(245,158,11,.4); background: linear-gradient(90deg, rgba(245,158,11,.14), var(--card)); }
+  .install img { flex: none; width: 46px; height: 46px; border-radius: 12px; }
+  .install b { display: block; font: 800 15px var(--head); }
+  .install .go { flex: none; padding: 10px 14px; border-radius: 12px; border: 0; cursor: pointer; font: 800 14px var(--head); color: #fff; background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+  .install .x { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; font-size: 16px; }
+  .sheet { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; background: rgba(0,0,0,.6); }
+  .sheet .box { width: 100%; max-width: 560px; padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); border-radius: 22px 22px 0 0; background: var(--card); border-top: 1px solid var(--line); animation: up .3s ease-out; }
+  @keyframes up { from { transform: translateY(40px); opacity: 0; } }
+  .sheet h3 { margin: 0 0 6px; font: 800 20px var(--head); }
+  .sheet ol { margin: 14px 0 18px; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 12px; }
+  .sheet li { position: relative; padding-left: 40px; counter-increment: s; line-height: 1.4; }
+  .sheet li::before { content: counter(s); position: absolute; left: 0; top: -2px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #1c1a18; font: 800 14px var(--head); }
+  .sheet .ico { display: inline-grid; place-items: center; width: 26px; height: 26px; margin: 0 2px; border-radius: 6px; background: var(--card2); vertical-align: -7px; }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 </head>
@@ -140,6 +163,7 @@
     <div id="login-msg" class="msg" role="alert" hidden></div>
     <div class="btns"><button class="btn" type="submit" id="login-btn">Continuar</button></div>
     <p class="muted sm" id="login-help" style="margin-top:14px"></p>
+    <p class="sm" style="text-align:center;margin:6px 0 0"><a href="#" id="login-install" hidden>📲 Instalar o app no celular</a></p>
   </form>
 </div>
 
@@ -155,6 +179,12 @@
   <a href="#/conta" data-tab="conta"><i>👤</i>Conta</a>
 </div></nav>
 
-<script type="module" src="/membros.js?v=1"></script>
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-t"><div class="box">
+  <h3 id="sheet-t">Instale o app no seu celular</h3>
+  <p class="muted sm" id="sheet-sub">Fica com ícone na tela inicial e abre direto, sem precisar procurar o link.</p>
+  <ol id="sheet-steps"></ol>
+  <button class="btn" type="button" id="sheet-ok">Entendi</button>
+</div></div>
+<script type="module" src="/membros.js?v=2"></script>
 </body>
 </html>

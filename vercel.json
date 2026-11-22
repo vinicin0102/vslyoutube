@@ -16,6 +16,10 @@
     {
       "source": "/membros",
       "destination": "/membros.html"
+    },
+    {
+      "source": "/membros.webmanifest",
+      "destination": "/api/membros?a=manifest"
     }
   ],
   "headers": [
@@ -72,6 +76,19 @@
         {
           "key": "Referrer-Policy",
           "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/membros-sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/membros"
         }
       ]
     }

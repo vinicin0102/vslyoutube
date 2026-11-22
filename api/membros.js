@@ -30,9 +30,50 @@ function lessonVideo(v) {
   return { kind: 'none' };
 }
 
+// Nome embaixo do ícone: até 12 letras ("O Segredo dos Bifinhos Caseiros" -> "Bifinhos").
+const STOP = new Set(['o', 'a', 'os', 'as', 'de', 'da', 'do', 'dos', 'das', 'e', 'em', 'guia', 'segredo', 'curso', 'método', 'metodo']);
+function shortName(name) {
+  if (name.length <= 12) return name;
+  const words = name.split(/\s+/).filter((w) => !STOP.has(w.toLowerCase()));
+  let out = '';
+  for (const w of words) { if ((out + ' ' + w).trim().length > 12) break; out = (out + ' ' + w).trim(); }
+  return out || name.slice(0, 12);
+}
+
+/** Nome e ícones do app (PWA): do painel, ou o padrão que vem com o site. */
+async function appInfo() {
+  let s = null, title = '';
+  try { s = await loadSettings(); title = (await loadCourse()).title; } catch {}
+  const name = s?.app_name || title || 'Área de membros';
+  const icon = s?.app_icon || '';
+  return {
+    name, short: shortName(name),
+    icons: icon
+      ? [{ src: icon, sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: icon, sizes: '512x512', type: 'image/png', purpose: 'maskable' }]
+      : [
+          { src: '/media/app-any-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/media/app-any-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/media/app-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: '/media/app-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+    apple: icon || '/media/app-apple-180.png',
+  };
+}
+
 export async function GET(request) {
-  if (!membersConfigured()) return json({ error: NO_DB_MSG }, 503);
   const a = new URL(request.url).searchParams.get('a');
+  if (a === 'app' || a === 'manifest') {
+    const info = await appInfo();
+    if (a === 'app') return json({ name: info.name, short: info.short, apple: info.apple }, 200, { 'cache-control': 'public, max-age=0, s-maxage=60' });
+    const manifest = {
+      id: '/membros', name: info.name, short_name: info.short, lang: 'pt-BR',
+      description: 'Área de membros: aulas, bônus e chat 24h.',
+      start_url: '/membros?app=1', scope: '/membros', display: 'standalone', orientation: 'portrait',
+      background_color: '#121110', theme_color: '#121110', icons: info.icons,
+    };
+    return new Response(JSON.stringify(manifest), { headers: { 'content-type': 'application/manifest+json; charset=utf-8', 'cache-control': 'public, max-age=0, s-maxage=60' } });
+  }
+  if (!membersConfigured()) return json({ error: NO_DB_MSG }, 503);
   try {
     const member = await currentMember(request);
     if (!member) return json({ error: 'Entre com o seu e-mail.', login: true }, 401);

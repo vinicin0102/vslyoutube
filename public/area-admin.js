@@ -209,7 +209,27 @@ function fillSettings(s) {
   $('#s-instr').value = s.instructions;
   $('#s-support').value = s.support;
   $('#a-hook').value = `${location.origin}/api/membros?a=webhook&token=${s.webhook_token}`;
+  $('#s-appname').value = s.app_name || '';
+  appIcon = s.app_icon || ''; paintAppIcon();
 }
+let appIcon = '';
+function paintAppIcon() {
+  const box = $('#s-appicon');
+  box.querySelectorAll(':scope > :not(.media-label)').forEach((n) => n.remove());
+  box.insertAdjacentHTML('beforeend', `${appIcon ? `<div class="media-current"><img class="thumb" src="${esc(appIcon)}" alt="" style="border-radius:22%"><button type="button" class="small danger" id="s-appicon-rm">Remover</button></div>` : ''}<input type="file" accept="image/png,image/jpeg,image/webp"><div class="progress" hidden><div></div></div><div class="media-err"></div>`);
+}
+$('#s-appicon').addEventListener('click', (e) => { if (e.target.id === 's-appicon-rm') { appIcon = ''; paintAppIcon(); } });
+$('#s-appicon').addEventListener('change', async (e) => {
+  const f = e.target.files?.[0]; if (!f) return;
+  const box = $('#s-appicon'), bar = $('.progress', box), err = $('.media-err', box);
+  bar.hidden = false; err.textContent = '';
+  try { appIcon = await upload(f, 'image', (p) => (bar.firstChild.style.width = p + '%')); paintAppIcon(); }
+  catch (ex) { err.textContent = 'Falha no envio: ' + ex.message; bar.hidden = true; }
+});
+$('#s-appsave').addEventListener('click', async () => {
+  try { await saveSettings({ app_name: $('#s-appname').value, app_icon: appIcon }); flash('ok', 'App salvo. Quem instalar daqui pra frente já recebe o nome e o ícone novos.'); }
+  catch (ex) { flash('err', ex.message); }
+});
 async function saveSettings(extra = {}) {
   const body = { ai_key: $('#s-key').value.trim(), ai_model: $('#s-model').value, chat_limit: Number($('#s-limit').value), assistant_name: $('#s-name').value, instructions: $('#s-instr').value, support: $('#s-support').value, ...extra };
   fillSettings(await api('settings', { method: 'PUT', body: JSON.stringify(body) }));

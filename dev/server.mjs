@@ -11,7 +11,7 @@ process.env.VSL_LOCAL_DIR ??= path.join(ROOT, '.dev-data');
 process.env.ADMIN_PASSWORD ??= 'teste123';
 process.env.SESSION_SECRET ??= 'dev-secret';
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.mp4': 'video/mp4', '.webm': 'video/webm' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.mp4': 'video/mp4', '.webm': 'video/webm', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
 const EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif', 'video/mp4': 'mp4', 'video/webm': 'webm' };
 
 http.createServer(async (req, res) => {
@@ -21,6 +21,7 @@ http.createServer(async (req, res) => {
   if (p === '/admin') p = '/admin.html';
   if (p === '/oferta') p = '/api/oferta';
   if (p === '/membros') p = '/membros.html';
+  if (p === '/membros.webmanifest') { url.searchParams.set('a', 'manifest'); p = '/api/membros'; }
   const chunks = [];
   for await (const c of req) chunks.push(c);
   const body = Buffer.concat(chunks);

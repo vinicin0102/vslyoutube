@@ -220,6 +220,13 @@
       <h2>Acesso dos alunos</h2>
       <p class="hint">Os alunos entram em <b id="a-link-text">/membros</b> com o e-mail da compra e criam a senha no primeiro acesso.</p>
       <div class="copyrow"><input id="a-link" readonly aria-label="Link da área de membros"><button type="button" data-copy="a-link">Copiar</button><a class="btn" id="a-open" href="/membros" target="_blank" rel="noopener">Abrir ↗</a></div>
+      <h3 class="sub">App no celular</h3>
+      <p class="hint">A área de membros é um app instalável: o aluno toca em "Instalar o app" e ganha um ícone na tela do celular (Android e iPhone).</p>
+      <div class="grid2">
+        <label>Nome do app <small>(vazio = nome do curso)</small><input id="s-appname" maxlength="40" placeholder="Bifinhos Caseiros"></label>
+        <div class="media" data-media="s_app_icon" data-kind="image" id="s-appicon"><span class="media-label">Ícone do app <small>(PNG quadrado, 512×512; vazio = ícone padrão)</small></span></div>
+      </div>
+      <button type="button" id="s-appsave">Salvar app</button>
       <h3 class="sub">Liberação automática pela plataforma de vendas</h3>
       <p class="hint">Cole este link no <b>webhook</b> da sua plataforma (Kiwify, Hotmart, Cakto, Eduzz, Perfect Pay, Ticto…). Compra aprovada libera o acesso na hora; reembolso ou chargeback bloqueia. Na plataforma, coloque também o link da área de membros como "link de acesso" do produto, para o comprador receber no e-mail.</p>
       <div class="copyrow"><input id="a-hook" readonly aria-label="Link do webhook"><button type="button" data-copy="a-hook">Copiar</button></div>
@@ -455,6 +462,6 @@
 
 <script type="module" src="/admin.js?v=8"></script>
 <script type="module" src="/metrics.js?v=3"></script>
-<script type="module" src="/area-admin.js?v=1"></script>
+<script type="module" src="/area-admin.js?v=2"></script>
 </body>
 </html>

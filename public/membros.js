@@ -31,11 +31,63 @@ function done() { try { return new Set(JSON.parse(localStorage.getItem(progKey()
 function setDone(id, on) { const s = done(); on ? s.add(id) : s.delete(id); try { localStorage.setItem(progKey(), JSON.stringify([...s])); } catch {} }
 const allLessons = () => course.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, mod: m })));
 
+/* ---------- app instalável (PWA) ---------- */
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const ua = navigator.userAgent;
+const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const inApp = /FBAN|FBAV|Instagram|Line\/|TikTok|musical_ly/i.test(ua); // navegador dentro do Instagram/Facebook não instala
+let installEvt = null, appIcon = '/media/app-apple-180.png';
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/membros-sw.js', { scope: '/membros' }).catch(() => {}));
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; refreshInstall(); });
+addEventListener('appinstalled', () => { installEvt = null; refreshInstall(); });
+const dismissed = () => { try { return Date.now() - Number(localStorage.getItem('install-x') || 0) < 3 * 864e5; } catch { return false; } };
+const canOfferInstall = () => !standalone();
+function refreshInstall() {
+  const l = $('#login-install'); if (l) l.hidden = !canOfferInstall();
+  const card = $('#install'); if (card) card.hidden = !canOfferInstall() || dismissed();
+}
+function installCard() {
+  if (!canOfferInstall() || dismissed()) return '';
+  return `<div class="card install" id="install"><img src="${esc(appIcon)}" alt=""><div style="flex:1"><b>Instale o app</b><span class="muted sm">Ícone na tela do celular e acesso com um toque</span></div><button type="button" class="go" data-install>Instalar</button><button type="button" class="x" data-install-x aria-label="Agora não">✕</button></div>`;
+}
+async function doInstall() {
+  if (installEvt) {
+    installEvt.prompt();
+    const r = await installEvt.userChoice.catch(() => null);
+    installEvt = null; refreshInstall();
+    if (r?.outcome === 'accepted') return;
+  }
+  // Sem o aviso automático do navegador: mostra o passo a passo.
+  const steps = $('#sheet-steps');
+  if (inApp) {
+    $('#sheet-sub').textContent = 'Você abriu pelo navegador do Instagram/Facebook, que não instala apps. Faça assim:';
+    steps.innerHTML = `<li>Toque nos <b>três pontinhos</b> <span class="ico">⋯</span> no canto da tela</li><li>Escolha <b>${isIOS ? 'Abrir no Safari' : 'Abrir no Chrome'}</b> (ou "Abrir no navegador")</li><li>Entre de novo e toque em <b>Instalar o app</b></li>`;
+  } else if (isIOS) {
+    $('#sheet-sub').textContent = 'No iPhone, a instalação é pelo Safari, em 3 toques:';
+    steps.innerHTML = `<li>Toque no botão <b>Compartilhar</b> <span class="ico">⬆︎</span> na barra do Safari</li><li>Role e toque em <b>Adicionar à Tela de Início</b> <span class="ico">＋</span></li><li>Toque em <b>Adicionar</b>. Pronto: o app aparece na sua tela inicial 🐶</li>`;
+  } else {
+    $('#sheet-sub').textContent = 'No Android, pelo Chrome:';
+    steps.innerHTML = `<li>Toque nos <b>três pontinhos</b> <span class="ico">⋮</span> no canto de cima</li><li>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b></li><li>Confirme em <b>Instalar</b>. O ícone aparece junto com seus outros apps 🐶</li>`;
+  }
+  $('#sheet').hidden = false;
+  $('#sheet-ok').focus();
+}
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-install], #login-install')) { e.preventDefault(); doInstall(); }
+  if (e.target.closest('[data-install-x]')) { try { localStorage.setItem('install-x', String(Date.now())); } catch {} refreshInstall(); }
+  if (e.target.id === 'sheet-ok' || e.target.id === 'sheet') $('#sheet').hidden = true;
+});
+fetch('/api/membros?a=app').then((r) => r.json()).then((a) => {
+  if (a.apple) { appIcon = a.apple; $('#apple-icon').href = a.apple; }
+  if (a.name) { document.title = a.name; $('meta[name="apple-mobile-web-app-title"]').content = a.short || a.name; }
+}).catch(() => {});
+
 /* ---------- login ---------- */
 let loginStep = 'email';
 function showLogin() {
   $('#app').hidden = true; $('#nav').hidden = true; $('#login').hidden = false;
   $('#login-help').innerHTML = me?.support ? 'Precisa de ajuda? ' + esc(me.support) : 'Ainda não tem acesso? Use o mesmo e-mail da compra.';
+  refreshInstall();
 }
 function setStep(step) {
   loginStep = step;
@@ -93,6 +145,7 @@ function home() {
   view().innerHTML = `<main>
     <h1>Olá${first ? ', ' + esc(first) : ''}! 🐶</h1>
     <p class="muted sm" style="margin:2px 0 0">${esc(course.welcome)}</p>
+    ${installCard()}
     <div class="card prog"><div class="row"><span>Seu progresso no guia</span><b>${pct}%</b></div><div class="bar"><i style="width:${pct}%"></i></div></div>
     ${next ? `<a class="card cont" href="#/a/${next.mod.id}/${next.id}"><div class="thumb"></div><div class="info"><span class="kick">${d.has(next.id) ? 'Rever aula' : 'Continuar assistindo'}</span><b>${esc(next.title)}</b><span class="muted sm">${esc(next.mod.title)}</span></div></a>` : ''}
     <h2>Módulos</h2>
@@ -201,8 +254,12 @@ function conta() {
   view().innerHTML = `<main><h1>Sua conta</h1>
     <div class="card acc"><div><span class="muted">E-mail</span><b>${esc(me.email)}</b></div>${me.name ? `<div><span class="muted">Nome</span><b>${esc(me.name)}</b></div>` : ''}<div><span class="muted">Aulas concluídas</span><b>${all.filter((l) => d.has(l.id)).length} de ${all.length}</b></div></div>
     ${me.support ? `<h2>Suporte</h2><div class="card acc"><div style="display:block">${esc(me.support)}</div></div>` : ''}
-    <div class="btns"><button class="btn ghost" id="logout" type="button">Sair</button></div></main>`;
-  $('#logout').addEventListener('click', async () => { await api('logout', { method: 'POST' }).catch(() => {}); me = null; setStep('email'); showLogin(); });
+    <div class="btns">${canOfferInstall() ? '<button class="btn" type="button" data-install>📲 Instalar o app no celular</button>' : ''}<button class="btn ghost" id="logout" type="button">Sair</button></div></main>`;
+  $('#logout').addEventListener('click', async () => {
+    await api('logout', { method: 'POST' }).catch(() => {});
+    navigator.serviceWorker?.controller?.postMessage('logout'); // apaga os dados guardados para o modo offline
+    me = null; setStep('email'); showLogin();
+  });
 }
 
 function route() {
@@ -227,7 +284,7 @@ async function boot() {
   }
   $('#login').hidden = true; $('#app').hidden = false; $('#nav').hidden = false;
   $('#brand').textContent = course.title || 'Área de membros';
-  document.title = (course.title || 'Área de membros') + ' · Área de membros';
+  if (!document.title || document.title === 'Área de membros') document.title = course.title || 'Área de membros';
   route();
 }
 boot();
