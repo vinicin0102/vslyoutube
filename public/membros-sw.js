@@ -1,8 +1,8 @@
 // Service worker do app da área de membros (PWA).
 // - Abre na hora (casca do app guardada no aparelho).
 // - Sem internet: mostra as aulas e o conteúdo da última visita (vídeos e chat precisam de internet).
-const VERSION = 'membros-v2';
-const SHELL = ['/membros', '/membros.js?v=2', '/media/app-any-192.png', '/media/app-maskable-512.png', '/media/app-apple-180.png'];
+const VERSION = 'membros-v3';
+const SHELL = ['/membros', '/membros.js?v=3', '/media/app-any-192.png', '/media/app-maskable-512.png', '/media/app-apple-180.png'];
 const API_CACHE = 'membros-api';
 
 self.addEventListener('install', (e) => {

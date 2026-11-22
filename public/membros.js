@@ -177,7 +177,7 @@ function lessonView(mid, lid) {
   const all = allLessons(), idx = all.findIndex((x) => x.id === l.id), nxt = all[idx + 1];
   const v = l.video;
   let player = '';
-  if (v.kind === 'file') player = `<div class="player"><video src="${esc(v.src)}" controls playsinline preload="metadata"></video></div>`;
+  if (v.kind === 'file') player = `<div class="player" id="pl"><video src="${esc(v.src)}" controls playsinline preload="metadata"></video></div>`;
   else if (v.kind === 'iframe') player = `<div class="player"><iframe src="${esc(v.src)}" title="${esc(l.title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`;
   else if (v.kind === 'embed') player = `<div class="player embed" id="embed"></div>`;
   else if (!l.text) player = `<div class="player none">O vídeo desta aula estará disponível em breve.</div>`;
@@ -192,6 +192,14 @@ function lessonView(mid, lid) {
       ${nxt ? `<a class="btn" href="#/a/${nxt.mod.id}/${nxt.id}">Próxima aula →</a>` : ''}
       <a class="btn ghost" href="#/chat">Ficou com dúvida? Pergunte no chat</a>
     </div></main>`;
+  // Vídeo em pé (celular): o player fica em pé também, sem faixas pretas.
+  const pv = $('#pl video');
+  if (pv) pv.addEventListener('loadedmetadata', () => {
+    if (pv.videoHeight > pv.videoWidth) {
+      const pl = $('#pl'), r = pv.videoWidth / pv.videoHeight;
+      Object.assign(pl.style, { aspectRatio: `${pv.videoWidth} / ${pv.videoHeight}`, width: `min(100%, calc(76vh * ${r}))`, margin: '0 auto', borderRadius: '16px', overflow: 'hidden' });
+    }
+  });
   if (v.kind === 'embed') {
     // Código de player (Panda, VTurb…) colado pelo produtor no painel.
     const box = $('#embed'); box.innerHTML = v.html;
