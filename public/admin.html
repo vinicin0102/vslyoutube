@@ -33,6 +33,7 @@
     <nav class="tabs" aria-label="Seções do painel">
       <button type="button" class="tab" data-tab="edit" aria-current="page">VSL</button>
       <button type="button" class="tab" data-tab="sales">Página de vendas</button>
+      <button type="button" class="tab" data-tab="upsell">Upsell</button>
       <button type="button" class="tab" data-tab="area">Área de membros</button>
       <button type="button" class="tab" data-tab="metrics">Métricas</button>
     </nav>
@@ -219,6 +220,156 @@
       </section>
 
       <div class="savebar"><button class="primary savebtn" type="submit" id="save">Salvar alterações</button></div>
+    </form>
+  </main>
+
+  <main id="tab-upsell" hidden>
+    <div id="umsgs" aria-live="polite"></div>
+    <form id="fu" novalidate>
+      <section class="card">
+        <h2>Upsell e downsell</h2>
+        <p class="hint">Páginas que o cliente vê logo depois de comprar. O caminho fica assim:<br>
+          <b>compra aprovada → /upsell</b> → se recusar, <b>/downsell</b> → depois, <b>/membros</b>.</p>
+        <ol class="hint" style="padding-left:18px;margin:8px 0 0">
+          <li>Na plataforma de vendas, crie os produtos do upsell e do downsell.</li>
+          <li>No produto principal, coloque como página de obrigado / upsell: <code class="u-link" data-p="upsell">/upsell</code></li>
+          <li>Gere o código de <b>upsell de 1 clique</b> de cada produto extra e cole abaixo, no campo "Código de compra com 1 clique". Nele, o "não quero" de /upsell deve ir para <code class="u-link" data-p="downsell">/downsell</code> e o do downsell para <code class="u-link" data-p="membros">/membros</code>.</li>
+          <li>Nos produtos extras, cadastre o mesmo webhook da aba Área de membros, com <code>&amp;produto=upsell</code> (ou <code>&amp;produto=downsell</code>) no fim do link. Assim a compra vai para o pixel com o valor certo, e um reembolso do extra não bloqueia o acesso ao guia.</li>
+        </ol>
+        <button type="button" id="u-restore" style="margin-top:12px">Restaurar o modelo original</button>
+        <p class="hint" style="margin-top:12px">O logo, o favicon, o rodapé e o pixel são os mesmos da página de vendas. Nos textos: <code>**negrito**</code> · <code>==destaque==</code>.</p>
+      </section>
+
+      <section class="card">
+        <h2>Upsell</h2>
+        <p class="hint">Endereço: <b>/upsell</b> · <a href="/upsell?v=1" class="view-up" data-page="upsell" target="_blank" rel="noopener">Abrir ↗</a></p>
+        <label class="inline"><input type="checkbox" name="upsell.enabled"> Página no ar</label>
+        <label>Aviso no topo <small>(faixa amarela; vazio = sem faixa)</small><input name="upsell.alert" maxlength="300"></label>
+        <label>Frase acima do título<input name="upsell.tag" maxlength="200"></label>
+        <label>Título <small>(o trecho entre == == fica marcado)</small><textarea name="upsell.headline" rows="3" maxlength="400"></textarea></label>
+        <label>Linha de apoio<textarea name="upsell.subheadline" rows="3" maxlength="800"></textarea></label>
+      </section>
+      <section class="card">
+        <h2>Upsell: vídeo ou imagem <small>(opcional)</small></h2>
+        <div class="seg" role="radiogroup" aria-label="Vídeo da página /upsell">
+          <label><input type="radio" name="upsell.video_type" value="none"><span>Sem vídeo</span></label>
+          <label><input type="radio" name="upsell.video_type" value="upload"><span>Enviar arquivo</span></label>
+          <label><input type="radio" name="upsell.video_type" value="url"><span>Link</span></label>
+          <label><input type="radio" name="upsell.video_type" value="embed"><span>Código do player</span></label>
+        </div>
+        <div class="pane" data-pane="none"></div>
+        <div class="pane" data-pane="upload">
+          <div class="media" data-media="upsell.video_file" data-kind="media"><span class="media-label">Vídeo (MP4 ou WEBM) ou imagem</span></div>
+        </div>
+        <div class="pane" data-pane="url">
+          <label>Link do vídeo <small>(YouTube, Vimeo ou link direto .mp4)</small><input type="url" name="upsell.video_url" placeholder="https://"></label>
+        </div>
+        <div class="pane" data-pane="embed">
+          <label>Código do player<textarea class="code" name="upsell.video_embed" rows="4"></textarea></label>
+        </div>
+        <label class="inline" style="margin-top:12px"><input type="checkbox" name="upsell.video_autoplay"> Começar sozinho, sem som</label>
+        <label>Formato
+          <select name="upsell.video_ratio">
+            <option value="9:16">Vertical 9:16 (celular)</option>
+            <option value="4:5">Vertical 4:5</option>
+            <option value="1:1">Quadrado 1:1</option>
+            <option value="16:9">Horizontal 16:9</option>
+          </select>
+        </label>
+      </section>
+      <section class="card">
+        <h2>Upsell: conteúdo</h2>
+        <label>Título das dores<input name="upsell.problems_title" maxlength="200"></label>
+        <label>Dores <small>(uma por linha; aparecem com ✕)</small><textarea name="upsell.problems" rows="5" maxlength="3000"></textarea></label>
+        <label>Título do que recebe<input name="upsell.includes_title" maxlength="200"></label>
+        <label>O que recebe <small>(um por linha: item | descrição; um emoji no começo vira o ícone)</small><textarea name="upsell.includes" rows="6" maxlength="4000"></textarea></label>
+      </section>
+      <section class="card">
+        <h2>Upsell: oferta e botão</h2>
+        <label>Preço <small>(ex.: de R$ 97 por R$ 47)</small><input name="upsell.offer_text" maxlength="200"></label>
+        <label>Frase abaixo do preço<input name="upsell.offer_note" maxlength="300"></label>
+        <label>Código de compra com 1 clique <small>(recomendado: o código de upsell que a plataforma de vendas gera para este produto. Se preencher, ele substitui o botão abaixo)</small><textarea class="code" name="upsell.cta_code" rows="4"></textarea></label>
+        <div class="grid2">
+          <label>Texto do botão<input name="upsell.cta_text" maxlength="80"></label>
+          <label>Cor do botão<input type="color" name="upsell.cta_color"></label>
+        </div>
+        <label>Link do checkout <small>(usado quando não há código de 1 clique)</small><input type="url" name="upsell.cta_url" placeholder="https://"></label>
+        <label>Texto abaixo do botão<input name="upsell.pay_note" maxlength="200"></label>
+        <label>Texto do "não, obrigado" <small>(vazio = esconde)</small><input name="upsell.decline_text" maxlength="200"></label>
+        <label>Para onde vai quem recusa <small>(normalmente /downsell)</small><input name="upsell.decline_url" maxlength="300"></label>
+      </section>
+      <section class="card">
+        <h2>Upsell: garantia e P.S.</h2>
+        <label>Título da garantia<input name="upsell.guarantee_title" maxlength="200"></label>
+        <label>Texto da garantia<textarea name="upsell.guarantee_text" rows="3" maxlength="1000"></textarea></label>
+        <label>P.S. <small>(opcional; com P.S., o botão aparece de novo no fim)</small><textarea name="upsell.ps" rows="3" maxlength="2000"></textarea></label>
+      </section>
+
+      <section class="card">
+        <h2>Downsell</h2>
+        <p class="hint">Endereço: <b>/downsell</b> · <a href="/downsell?v=1" class="view-up" data-page="downsell" target="_blank" rel="noopener">Abrir ↗</a></p>
+        <label class="inline"><input type="checkbox" name="downsell.enabled"> Página no ar</label>
+        <label>Aviso no topo <small>(faixa amarela; vazio = sem faixa)</small><input name="downsell.alert" maxlength="300"></label>
+        <label>Frase acima do título<input name="downsell.tag" maxlength="200"></label>
+        <label>Título <small>(o trecho entre == == fica marcado)</small><textarea name="downsell.headline" rows="3" maxlength="400"></textarea></label>
+        <label>Linha de apoio<textarea name="downsell.subheadline" rows="3" maxlength="800"></textarea></label>
+      </section>
+      <section class="card">
+        <h2>Downsell: vídeo ou imagem <small>(opcional)</small></h2>
+        <div class="seg" role="radiogroup" aria-label="Vídeo da página /downsell">
+          <label><input type="radio" name="downsell.video_type" value="none"><span>Sem vídeo</span></label>
+          <label><input type="radio" name="downsell.video_type" value="upload"><span>Enviar arquivo</span></label>
+          <label><input type="radio" name="downsell.video_type" value="url"><span>Link</span></label>
+          <label><input type="radio" name="downsell.video_type" value="embed"><span>Código do player</span></label>
+        </div>
+        <div class="pane" data-pane="none"></div>
+        <div class="pane" data-pane="upload">
+          <div class="media" data-media="downsell.video_file" data-kind="media"><span class="media-label">Vídeo (MP4 ou WEBM) ou imagem</span></div>
+        </div>
+        <div class="pane" data-pane="url">
+          <label>Link do vídeo <small>(YouTube, Vimeo ou link direto .mp4)</small><input type="url" name="downsell.video_url" placeholder="https://"></label>
+        </div>
+        <div class="pane" data-pane="embed">
+          <label>Código do player<textarea class="code" name="downsell.video_embed" rows="4"></textarea></label>
+        </div>
+        <label class="inline" style="margin-top:12px"><input type="checkbox" name="downsell.video_autoplay"> Começar sozinho, sem som</label>
+        <label>Formato
+          <select name="downsell.video_ratio">
+            <option value="9:16">Vertical 9:16 (celular)</option>
+            <option value="4:5">Vertical 4:5</option>
+            <option value="1:1">Quadrado 1:1</option>
+            <option value="16:9">Horizontal 16:9</option>
+          </select>
+        </label>
+      </section>
+      <section class="card">
+        <h2>Downsell: conteúdo</h2>
+        <label>Título das dores<input name="downsell.problems_title" maxlength="200"></label>
+        <label>Dores <small>(uma por linha; aparecem com ✕)</small><textarea name="downsell.problems" rows="5" maxlength="3000"></textarea></label>
+        <label>Título do que recebe<input name="downsell.includes_title" maxlength="200"></label>
+        <label>O que recebe <small>(um por linha: item | descrição; um emoji no começo vira o ícone)</small><textarea name="downsell.includes" rows="6" maxlength="4000"></textarea></label>
+      </section>
+      <section class="card">
+        <h2>Downsell: oferta e botão</h2>
+        <label>Preço <small>(ex.: de R$ 97 por R$ 47)</small><input name="downsell.offer_text" maxlength="200"></label>
+        <label>Frase abaixo do preço<input name="downsell.offer_note" maxlength="300"></label>
+        <label>Código de compra com 1 clique <small>(recomendado: o código de upsell que a plataforma de vendas gera para este produto. Se preencher, ele substitui o botão abaixo)</small><textarea class="code" name="downsell.cta_code" rows="4"></textarea></label>
+        <div class="grid2">
+          <label>Texto do botão<input name="downsell.cta_text" maxlength="80"></label>
+          <label>Cor do botão<input type="color" name="downsell.cta_color"></label>
+        </div>
+        <label>Link do checkout <small>(usado quando não há código de 1 clique)</small><input type="url" name="downsell.cta_url" placeholder="https://"></label>
+        <label>Texto abaixo do botão<input name="downsell.pay_note" maxlength="200"></label>
+        <label>Texto do "não, obrigado" <small>(vazio = esconde)</small><input name="downsell.decline_text" maxlength="200"></label>
+        <label>Para onde vai quem recusa <small>(normalmente /membros)</small><input name="downsell.decline_url" maxlength="300"></label>
+      </section>
+      <section class="card">
+        <h2>Downsell: garantia e P.S.</h2>
+        <label>Título da garantia<input name="downsell.guarantee_title" maxlength="200"></label>
+        <label>Texto da garantia<textarea name="downsell.guarantee_text" rows="3" maxlength="1000"></textarea></label>
+        <label>P.S. <small>(opcional; com P.S., o botão aparece de novo no fim)</small><textarea name="downsell.ps" rows="3" maxlength="2000"></textarea></label>
+      </section>
+      <div class="savebar"><button class="primary savebtn" type="submit">Salvar alterações</button></div>
     </form>
   </main>
 
@@ -472,8 +623,8 @@
   </div>
 </template>
 
-<script type="module" src="/admin.js?v=9"></script>
-<script type="module" src="/metrics.js?v=3"></script>
+<script type="module" src="/admin.js?v=10"></script>
+<script type="module" src="/metrics.js?v=4"></script>
 <script type="module" src="/area-admin.js?v=3"></script>
 </body>
 </html>

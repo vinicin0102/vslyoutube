@@ -204,6 +204,9 @@ async function webhook(request, url) {
   try { payload = JSON.parse(raw); } catch { payload = Object.fromEntries(new URLSearchParams(raw)); }
   const sale = parseSale(payload);
   if (!sale.email) return json({ ok: true, ignored: 'sem e-mail do comprador' });
+  // Webhook dos produtos extras (upsell/downsell): link com &produto=upsell ou &produto=downsell.
+  // O reembolso de um extra não pode bloquear o acesso ao produto principal.
+  const extra = ['upsell', 'downsell'].includes(url.searchParams.get('produto')) ? url.searchParams.get('produto') : '';
   if (sale.action === 'grant') {
     const r = await upsertMember({ email: sale.email, name: sale.name, source: 'webhook', active: true });
     let capi = null;
@@ -214,14 +217,19 @@ async function webhook(request, url) {
       capi = await sendCapi(settings, content, {
         event_name: 'Purchase',
         event_id: 'compra-' + (det.order || sale.email),
-        event_source_url: url.origin + '/oferta',
+        event_source_url: url.origin + (extra ? '/' + extra : '/oferta'),
         user_data: userData({ email: sale.email, phone: det.phone, name: sale.name }),
-        custom_data: { currency: 'BRL', value: det.value || priceValue(content?.sales?.offer_text || content?.cta?.offer_text) || 0, content_name: 'Guia' },
+        custom_data: {
+          currency: 'BRL',
+          value: det.value || priceValue(extra ? content?.upsells?.[extra]?.offer_text : content?.sales?.offer_text || content?.cta?.offer_text) || 0,
+          content_name: extra ? (extra === 'upsell' ? 'Upsell' : 'Downsell') : 'Guia',
+        },
       });
     }
     return json({ ok: true, action: 'liberado', created: r.created, email: sale.email, pixel: capi?.sent ?? 0 });
   }
   if (sale.action === 'revoke') {
+    if (extra) return json({ ok: true, ignored: 'reembolso de produto extra: o acesso principal continua', email: sale.email });
     const m = await getMember(sale.email);
     if (m) await updateMember(sale.email, { active: false });
     return json({ ok: true, action: 'bloqueado', email: sale.email });

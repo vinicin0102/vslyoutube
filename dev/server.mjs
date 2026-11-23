@@ -20,6 +20,7 @@ http.createServer(async (req, res) => {
   if (p === '/') p = '/api/page';
   if (p === '/admin') p = '/admin.html';
   if (p === '/oferta') p = '/api/oferta';
+  if (p === '/upsell' || p === '/downsell') { url.searchParams.set('p', p.slice(1)); p = '/api/oferta'; }
   if (p === '/membros') p = '/membros.html';
   if (p === '/membros.webmanifest') { url.searchParams.set('a', 'manifest'); p = '/api/membros'; }
   const chunks = [];

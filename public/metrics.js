@@ -18,6 +18,7 @@ function showTab(name) {
   $('#tab-metrics').hidden = name !== 'metrics';
   $('#tab-sales').hidden = name !== 'sales';
   $('#tab-area').hidden = name !== 'area';
+  $('#tab-upsell').hidden = name !== 'upsell';
   if (name === 'metrics' && !loaded) load();
 }
 for (const b of document.querySelectorAll('.tab')) b.addEventListener('click', () => showTab(b.dataset.tab));

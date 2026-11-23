@@ -134,8 +134,10 @@ function setupMedia(el, url) {
     try {
       el.dataset.value = await uploadFile(file, kind, (p) => (bar.firstChild.style.width = p + '%'));
       dirty = true;
-      const pre = el.dataset.media.startsWith('s_') ? 's_' : '';
-      if (el.dataset.media === pre + 'video_file') { $(`input[name=${pre}video_type][value=upload]`).checked = true; syncPanes(); }
+      if (el.dataset.media.endsWith('video_file')) {
+        const r = $(`input[name="${el.dataset.media.replace(/video_file$/, '')}video_type"][value=upload]`);
+        if (r) { r.checked = true; syncPanes(); }
+      }
       paint();
     } catch (ex) {
       err.textContent = 'Falha no envio: ' + ex.message;
@@ -298,6 +300,7 @@ function fill(d) {
   d.testimonials.forEach(addRow);
   syncEmpty();
   fillSales(d.sales);
+  fillUpsells(d.upsells);
   syncPanes();
   dirty = false;
 }
@@ -353,6 +356,7 @@ function collect() {
     head_code: val('head_code'),
     meta_pixel_id: val('meta_pixel_id').trim(),
     sales: collectSales(),
+    upsells: collectUpsells(),
   };
 }
 
@@ -361,6 +365,76 @@ function syncPanes() {
     const v = ($(`input[name=${name}]:checked`) || {}).value || def;
     for (const p of $$('.pane', $(form))) p.hidden = p.dataset.pane !== v;
   }
+  for (const pg of U_PAGES) {
+    const v = ($(`input[name="${pg}.video_type"]:checked`) || {}).value || 'none';
+    for (const p of $$('.pane', $(`[name="${pg}.video_type"]`).closest('.card'))) p.hidden = p.dataset.pane !== v;
+  }
+}
+
+/* ---------- upsell e downsell ---------- */
+
+const U_PAGES = ['upsell', 'downsell'];
+const U_CHECKS = ['enabled'];
+
+async function restoreUpsells(ask = true) {
+  if (ask && !confirm('Preencher as páginas de upsell e downsell com o modelo original? O que você mudou nesta aba será substituído (só vale depois de Salvar).')) return;
+  try {
+    fillUpsells(await api('/api/content?defaults=upsells'));
+    syncPanes();
+    dirty = true;
+    if (ask) flash($('#umsgs'), 'ok', 'Modelo original preenchido. Ajuste o que quiser e clique em Salvar alterações.');
+  } catch (ex) {
+    flash($('#umsgs'), 'err', 'Não foi possível carregar o modelo: ' + ex.message);
+  }
+}
+$('#u-restore').addEventListener('click', () => restoreUpsells());
+for (const c of $$('#tab-upsell .u-link')) c.textContent = location.origin + '/' + c.dataset.p;
+
+function fillUpsells(u) {
+  if (!u || !u.upsell) { restoreUpsells(false); return; }
+  const f = $('#fu').elements;
+  for (const pg of U_PAGES) {
+    const t = u[pg] || {};
+    for (const el of f) {
+      if (!el.name || !el.name.startsWith(pg + '.') || el.name.includes('.video_')) continue;
+      const k = el.name.slice(pg.length + 1);
+      if (U_CHECKS.includes(k)) el.checked = Boolean(t[k]);
+      else if (k in t) el.value = t[k] ?? '';
+    }
+    const v = t.video || {};
+    ($(`input[name="${pg}.video_type"][value="${v.type}"]`) || $(`input[name="${pg}.video_type"][value=none]`)).checked = true;
+    f[pg + '.video_url'].value = v.url || '';
+    f[pg + '.video_embed'].value = v.embed || '';
+    f[pg + '.video_ratio'].value = v.ratio || '9:16';
+    f[pg + '.video_autoplay'].checked = Boolean(v.autoplay);
+    setupMedia($(`[data-media="${pg}.video_file"]`), v.file);
+  }
+}
+
+function collectUpsells() {
+  const f = $('#fu').elements;
+  const out = {};
+  for (const pg of U_PAGES) {
+    const t = {};
+    for (const el of f) {
+      if (!el.name || !el.name.startsWith(pg + '.') || el.name.includes('.video_')) continue;
+      const k = el.name.slice(pg.length + 1);
+      t[k] = U_CHECKS.includes(k) ? el.checked : el.value;
+    }
+    t.cta_url = (t.cta_url || '').trim();
+    t.decline_url = (t.decline_url || '').trim();
+    t.video = {
+      type: ($(`input[name="${pg}.video_type"]:checked`) || {}).value || 'none',
+      file: $(`[data-media="${pg}.video_file"]`).dataset.value,
+      url: f[pg + '.video_url'].value.trim(),
+      embed: f[pg + '.video_embed'].value,
+      ratio: f[pg + '.video_ratio'].value,
+      autoplay: f[pg + '.video_autoplay'].checked,
+      pause_image: '',
+    };
+    out[pg] = t;
+  }
+  return out;
 }
 
 /* ---------- página de vendas ---------- */
@@ -430,6 +504,11 @@ function warnings(d) {
   if ($('#f').elements.cta_url.value.trim() && !/^https?:\/\//i.test(d.cta.url)) out.push('o link do botão precisa começar com https://');
   if (d.video.type === 'url' && d.video.url && !/^https?:\/\//i.test(d.video.url)) out.push('o link do vídeo precisa começar com https://');
   if ($('#fs').elements.s_cta_url.value.trim() && !/^https?:\/\//i.test(d.sales.cta_url)) out.push('o link do botão da página de vendas precisa começar com https://');
+  for (const pg of U_PAGES) {
+    const f = $('#fu').elements;
+    if (f[pg + '.cta_url'].value.trim() && !d.upsells[pg].cta_url) out.push(`o link do checkout do ${pg} precisa começar com https://`);
+    if (f[pg + '.decline_url'].value.trim() && !d.upsells[pg].decline_url) out.push(`o link do "não, obrigado" do ${pg} precisa começar com / ou https://`);
+  }
   return out;
 }
 
@@ -440,7 +519,7 @@ async function loadEditor() {
   try {
     const last = JSON.parse(localStorage.getItem(LAST_SAVED) || 'null');
     // A cópia local pode ser de antes da página de vendas existir: mantém a do servidor nesse caso.
-    if (last && last.video && last.cta && last.updatedAt > (d.updatedAt || 0)) d = { ...last, sales: last.sales || d.sales };
+    if (last && last.video && last.cta && last.updatedAt > (d.updatedAt || 0)) d = { ...last, sales: last.sales || d.sales, upsells: last.upsells || d.upsells };
   } catch {}
   fill(d);
   loadCapi();
@@ -523,7 +602,7 @@ $('#tlist').addEventListener('input', (ev) => {
   if (ev.target.matches('[data-f=name]')) $('.trow-title', ev.target.closest('.trow')).textContent = ev.target.value || 'Novo depoimento';
 });
 
-for (const form of ['#f', '#fs']) {
+for (const form of ['#f', '#fs', '#fu']) {
   $(form).addEventListener('change', (ev) => {
     if (/video_type$/.test(ev.target.name)) syncPanes();
     dirty = true;
@@ -534,6 +613,7 @@ for (const form of ['#f', '#fs']) {
 // As duas abas (VSL e página de vendas) salvam tudo junto, no mesmo arquivo.
 $('#f').addEventListener('submit', (ev) => { ev.preventDefault(); save($('#msgs')); });
 $('#fs').addEventListener('submit', (ev) => { ev.preventDefault(); save($('#smsgs')); });
+$('#fu').addEventListener('submit', (ev) => { ev.preventDefault(); save($('#umsgs')); });
 
 async function save(box) {
   if (pending > 0) return;
@@ -551,6 +631,7 @@ async function save(box) {
     fill(saved);
     viewStamp = '?v=' + saved.updatedAt; // fura o cache do CDN
     $('#view-sales').href = '/oferta' + viewStamp;
+    for (const a of $$('.view-up')) a.href = '/' + a.dataset.page + viewStamp;
     syncViewLink();
     const w = warnings(saved);
     flash(box, w.length ? 'err' : 'ok',
@@ -570,10 +651,10 @@ async function save(box) {
 // "Ver página" do topo abre a página da aba aberta: VSL ou página de vendas.
 let viewStamp = '';
 function syncViewLink() {
-  const sales = !$('#tab-sales').hidden, area = !$('#tab-area').hidden;
+  const sales = !$('#tab-sales').hidden, area = !$('#tab-area').hidden, up = !$('#tab-upsell').hidden;
   const a = $('#view-page');
-  a.href = area ? '/membros' : (sales ? '/oferta' : '/') + viewStamp;
-  a.textContent = area ? 'Ver área de membros ↗' : sales ? 'Ver página de vendas ↗' : 'Ver VSL ↗';
+  a.href = area ? '/membros' : (up ? '/upsell' : sales ? '/oferta' : '/') + (viewStamp || (up ? '?v=1' : ''));
+  a.textContent = area ? 'Ver área de membros ↗' : up ? 'Ver upsell ↗' : sales ? 'Ver página de vendas ↗' : 'Ver VSL ↗';
 }
 for (const b of $$('.tab')) b.addEventListener('click', () => setTimeout(syncViewLink));
 
