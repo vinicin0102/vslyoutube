@@ -206,6 +206,15 @@
       <section class="card">
         <h2>Avançado</h2>
         <label>IDs do Meta Pixel <small>(só os números; vários separados por vírgula — dispara PageView, VideoPlay, VideoProgress 25/50/75%, ViewContent + Pitch no pitch e InitiateCheckout no botão. Não cole o código do pixel abaixo se usar este campo, senão os eventos duplicam)</small><input name="meta_pixel_id" inputmode="numeric" maxlength="120" placeholder="Ex.: 2333279314171577, 2686392141817764"></label>
+        <div class="capi" style="margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:12px">
+          <span class="media-label">API de Conversões do Meta <small>(recomendado: marca o <b>InitiateCheckout</b> e a <b>Compra</b> direto do servidor, mesmo com bloqueador de anúncio ou iPhone. A compra vem do webhook da plataforma de vendas)</small></span>
+          <p class="hint">Para cada pixel: Gerenciador de Eventos → escolha o pixel → <b>Configurações</b> → API de Conversões → <b>Gerar token de acesso</b>. Copie e cole abaixo.</p>
+          <div id="capi-rows"></div>
+          <label>Código de teste <small>(opcional: o "TEST..." da aba Testar eventos, para ver os eventos chegando na hora; apague depois de testar)</small><input id="capi-test" maxlength="40" placeholder="TEST12345"></label>
+          <label class="inline"><input type="checkbox" id="capi-purchase"> Marcar a compra aprovada no pixel (desmarque se a plataforma de vendas já marca a compra com a API de Conversões dela)</label>
+          <button type="button" id="capi-save" style="margin-top:10px">Salvar API de Conversões</button>
+          <div id="capi-msg" class="hint" style="margin-top:8px"></div>
+        </div>
         <label>Código no &lt;head&gt; <small>(UTMify, Google Tag, outros pixels)</small><textarea class="code" name="head_code" rows="5"></textarea></label>
       </section>
 
@@ -463,7 +472,7 @@
   </div>
 </template>
 
-<script type="module" src="/admin.js?v=8"></script>
+<script type="module" src="/admin.js?v=9"></script>
 <script type="module" src="/metrics.js?v=3"></script>
 <script type="module" src="/area-admin.js?v=3"></script>
 </body>

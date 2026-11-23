@@ -443,8 +443,38 @@ async function loadEditor() {
     if (last && last.video && last.cta && last.updatedAt > (d.updatedAt || 0)) d = { ...last, sales: last.sales || d.sales };
   } catch {}
   fill(d);
+  loadCapi();
   if (storageWarning) flash($('#msgs'), 'err', storageWarning);
 }
+
+/* ---------- API de Conversões do Meta (tokens ficam no banco, não no arquivo público) ---------- */
+
+let capiS = null;
+function renderCapi() {
+  const box = $('#capi-rows');
+  if (!capiS) return;
+  const ids = $('#f').elements.meta_pixel_id.value.match(/\d{5,20}/g) || [];
+  box.innerHTML = ids.map((id) => `<label>Token do pixel ${id} <small>${capiS.meta_tokens_set?.[id] ? `(configurado, termina em ${capiS.meta_tokens_set[id]}; vazio = manter, "-" = tirar)` : '(não configurado)'}</small><input type="password" data-pid="${id}" autocomplete="off" spellcheck="false" placeholder="EAA..."></label>`).join('')
+    || '<p class="hint">Coloque os IDs do pixel no campo acima.</p>';
+  $('#capi-test').value = capiS.meta_test_code || '';
+  $('#capi-purchase').checked = capiS.capi_purchase !== false;
+}
+async function loadCapi() {
+  try { capiS = await api('/api/area?a=settings'); renderCapi(); }
+  catch (ex) { $('#capi-msg').textContent = 'A API de Conversões precisa do banco (Supabase) conectado: ' + ex.message; }
+}
+$('#f').elements.meta_pixel_id.addEventListener('input', () => renderCapi());
+$('#capi-save').addEventListener('click', async () => {
+  const meta_tokens = {};
+  for (const inp of $$('#capi-rows input[data-pid]')) if (inp.value.trim()) meta_tokens[inp.dataset.pid] = inp.value.trim();
+  const b = $('#capi-save'); b.disabled = true;
+  try {
+    capiS = await api('/api/area?a=settings', { method: 'PUT', headers: HDR, body: JSON.stringify({ meta_tokens, meta_test_code: $('#capi-test').value.trim(), capi_purchase: $('#capi-purchase').checked }) });
+    renderCapi();
+    $('#capi-msg').textContent = 'Salvo. ' + (Object.keys(capiS.meta_tokens_set || {}).length ? 'Os próximos cliques no botão e as compras aprovadas já vão para o pixel pelo servidor.' : 'Nenhum token configurado ainda.') + ' (Se mudou os IDs do pixel, salve também as alterações da página.)';
+  } catch (ex) { $('#capi-msg').textContent = 'Erro: ' + ex.message; }
+  finally { b.disabled = false; }
+});
 
 /* ---------- eventos ---------- */
 

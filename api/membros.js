@@ -10,6 +10,9 @@ import {
 import { courseDefaults, sanitizeCourse, settingsDefaults, sanitizeSettings } from '../lib/course.js';
 import { askVet, cleanHistory } from '../lib/vet.js';
 import { parseVideoUrl } from '../lib/content.js';
+import { loadContent } from '../lib/store.js';
+import { priceValue } from '../lib/render.js';
+import { sendCapi, userData, saleDetails } from '../lib/meta.js';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const loadCourse = async () => sanitizeCourse((await kvGet('course')) || courseDefaults());
@@ -203,7 +206,20 @@ async function webhook(request, url) {
   if (!sale.email) return json({ ok: true, ignored: 'sem e-mail do comprador' });
   if (sale.action === 'grant') {
     const r = await upsertMember({ email: sale.email, name: sale.name, source: 'webhook', active: true });
-    return json({ ok: true, action: 'liberado', created: r.created, email: sale.email });
+    let capi = null;
+    if (settings.capi_purchase) {
+      // A mesma venda pode chegar mais de uma vez (aprovada, completa…): o event_id igual evita contar duas vezes.
+      const det = saleDetails(payload);
+      const content = await loadContent().catch(() => null);
+      capi = await sendCapi(settings, content, {
+        event_name: 'Purchase',
+        event_id: 'compra-' + (det.order || sale.email),
+        event_source_url: url.origin + '/oferta',
+        user_data: userData({ email: sale.email, phone: det.phone, name: sale.name }),
+        custom_data: { currency: 'BRL', value: det.value || priceValue(content?.sales?.offer_text || content?.cta?.offer_text) || 0, content_name: 'Guia' },
+      });
+    }
+    return json({ ok: true, action: 'liberado', created: r.created, email: sale.email, pixel: capi?.sent ?? 0 });
   }
   if (sale.action === 'revoke') {
     const m = await getMember(sale.email);
