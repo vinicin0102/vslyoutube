@@ -458,6 +458,27 @@
         </div>
       </section>
 
+      <section class="card" style="border-color:#f59e0b">
+        <h2>🎁 Promoção perto do botão de compra</h2>
+        <p class="hint">Faixa em destaque logo acima dos botões de compra, <b>na VSL e na página de vendas</b>.</p>
+        <p class="hint" style="color:#b45309"><b>Atenção:</b> no Brasil, sorteio ligado à compra precisa de autorização prévia do Ministério da Fazenda (Lei 5.768/71). Sem ela, a promoção pode gerar multa. Ligue só depois de ter a autorização e o regulamento.</p>
+        <label class="inline"><input type="checkbox" name="promo_enabled"> Mostrar a promoção</label>
+        <label>Texto em destaque<input name="promo_title" maxlength="200"></label>
+        <label>Linha pequena <small>(opcional: prazo, número do certificado de autorização…)</small><input name="promo_note" maxlength="300"></label>
+        <label>Link do regulamento <small>(opcional)</small><input type="url" name="promo_rules_url" placeholder="https://"></label>
+      </section>
+
+      <section class="card">
+        <h2>🎬 Vídeo "por dentro da área de membros"</h2>
+        <p class="hint">Mostra o app por dentro: aulas, bônus, chat e instalação. Na página de vendas fica logo antes da oferta; na VSL, abaixo do botão (aparece junto com ele).</p>
+        <label class="inline"><input type="checkbox" name="tour_on_sales"> Mostrar na página de vendas</label>
+        <label class="inline"><input type="checkbox" name="tour_on_vsl"> Mostrar na VSL</label>
+        <label>Frase acima do título<input name="tour_kicker" maxlength="80"></label>
+        <label>Título<input name="tour_title" maxlength="200"></label>
+        <label>Texto<textarea name="tour_text" rows="2" maxlength="600"></textarea></label>
+        <div class="media" data-media="tour_video" data-kind="video"><span class="media-label">Vídeo <small>(já vem com o tour narrado; envie outro para trocar)</small></span></div>
+      </section>
+
       <section class="card">
         <h2>Topo</h2>
         <label>Frase acima do título<input name="s_tag" maxlength="200"></label>
@@ -623,7 +644,7 @@
   </div>
 </template>
 
-<script type="module" src="/admin.js?v=10"></script>
+<script type="module" src="/admin.js?v=11"></script>
 <script type="module" src="/metrics.js?v=4"></script>
 <script type="module" src="/area-admin.js?v=3"></script>
 </body>

@@ -301,6 +301,7 @@ function fill(d) {
   syncEmpty();
   fillSales(d.sales);
   fillUpsells(d.upsells);
+  fillExtras(d);
   syncPanes();
   dirty = false;
 }
@@ -357,6 +358,7 @@ function collect() {
     meta_pixel_id: val('meta_pixel_id').trim(),
     sales: collectSales(),
     upsells: collectUpsells(),
+    ...collectExtras(),
   };
 }
 
@@ -369,6 +371,29 @@ function syncPanes() {
     const v = ($(`input[name="${pg}.video_type"]:checked`) || {}).value || 'none';
     for (const p of $$('.pane', $(`[name="${pg}.video_type"]`).closest('.card'))) p.hidden = p.dataset.pane !== v;
   }
+}
+
+/* ---------- promoção e vídeo da área de membros (valem para a VSL e a página de vendas) ---------- */
+
+function fillExtras(d) {
+  const f = $('#fs').elements, t = d.tour || {}, p = d.promo || {};
+  f.promo_enabled.checked = Boolean(p.enabled);
+  f.promo_title.value = p.title || '';
+  f.promo_note.value = p.note || '';
+  f.promo_rules_url.value = p.rules_url || '';
+  f.tour_on_sales.checked = t.on_sales !== false;
+  f.tour_on_vsl.checked = t.on_vsl !== false;
+  f.tour_kicker.value = t.kicker || '';
+  f.tour_title.value = t.title || '';
+  f.tour_text.value = t.text || '';
+  setupMedia($('[data-media=tour_video]'), t.video);
+}
+function collectExtras() {
+  const f = $('#fs').elements;
+  return {
+    promo: { enabled: f.promo_enabled.checked, title: f.promo_title.value, note: f.promo_note.value, rules_url: f.promo_rules_url.value.trim() },
+    tour: { on_sales: f.tour_on_sales.checked, on_vsl: f.tour_on_vsl.checked, kicker: f.tour_kicker.value, title: f.tour_title.value, text: f.tour_text.value, video: $('[data-media=tour_video]').dataset.value },
+  };
 }
 
 /* ---------- upsell e downsell ---------- */
@@ -519,7 +544,7 @@ async function loadEditor() {
   try {
     const last = JSON.parse(localStorage.getItem(LAST_SAVED) || 'null');
     // A cópia local pode ser de antes da página de vendas existir: mantém a do servidor nesse caso.
-    if (last && last.video && last.cta && last.updatedAt > (d.updatedAt || 0)) d = { ...last, sales: last.sales || d.sales, upsells: last.upsells || d.upsells };
+    if (last && last.video && last.cta && last.updatedAt > (d.updatedAt || 0)) d = { ...last, sales: last.sales || d.sales, upsells: last.upsells || d.upsells, tour: last.tour || d.tour, promo: last.promo || d.promo };
   } catch {}
   fill(d);
   loadCapi();
