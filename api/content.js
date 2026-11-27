@@ -23,7 +23,7 @@ export async function PUT(request) {
   }
   const old = await loadContent().catch(() => null);
   // O contador de métricas só muda por "Zerar métricas" (api/metrics.js).
-  const next = sanitize({ ...body, sales: body.sales ?? old?.sales, upsells: body.upsells ?? old?.upsells, tour: body.tour ?? old?.tour, promo: body.promo ?? old?.promo, metrics_epoch: old?.metrics_epoch ?? 0, updatedAt: Date.now() });
+  const next = sanitize({ ...body, sales: body.sales ?? old?.sales, upsells: body.upsells ?? old?.upsells, tour: body.tour ?? old?.tour, promo: body.promo ?? old?.promo, price_v2: true, metrics_epoch: old?.metrics_epoch ?? 0, updatedAt: Date.now() });
   try {
     await saveContent(next);
   } catch (err) {
